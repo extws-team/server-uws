@@ -2,9 +2,12 @@
 	"name": "@extws/server-uws",
 	"version": "0.2.0-beta.1",
 	"description": "ExtWS server based on uWebSockets",
+	"publishConfig": {
+		"access": "public"
+	},
+	"type": "module",
 	"main": "dist/esm/main.js",
 	"types": "dist/esm/main.d.ts",
-	"type": "module",
 	"exports": {
 		".": {
 			"import": "./dist/esm/main.js",
@@ -40,21 +43,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/kirick13/extws-driver-uws.git"
+		"url": "git+https://github.com/extws-team/server-uws.git"
 	},
-	"keywords": [
-		"websocket",
-		"ws",
-		"networking",
-		"uwebsockets",
-		"extws",
-		"server",
-		"driver"
-	],
+	"keywords": [],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/kirick13/extws-driver-uws/issues"
+		"url": "https://github.com/extws-team/server-uws/issues"
 	},
-	"homepage": "https://github.com/kirick13/extws-driver-uws#readme"
+	"homepage": "https://github.com/extws-team/server-uws#readme"
 }
