@@ -1,25 +1,13 @@
 import {
 	ExtWS,
 	ExtWSClient,
-	OutcomePayloadEventType,
 } from '@extws/server';
-import { App, TemplatedApp } from 'uWebSockets.js';
+import {
+	App,
+	type TemplatedApp,
+} from 'uWebSockets.js';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsClient } from './client.js';
-
-// TODO export from @extws/server
-export const IDLE_TIMEOUT = 60;
-export const GROUP_BROADCAST = 'broadcast';
-export const GROUP_PREFIX = 'g-';
-
-interface BroadcastPayload extends Event {
-	payload: string;
-}
-
-interface GroupPayload extends Event {
-	group_id: string;
-	payload: string;
-}
 
 export class ExtWSUwsServer extends ExtWS {
 	private uws_server: TemplatedApp;
@@ -27,52 +15,29 @@ export class ExtWSUwsServer extends ExtWS {
 	constructor({
 		port,
 		path = '/ws',
-		payload_max_length = 1024,
 	}: {
 		port: number,
 		path?: string,
-		payload_max_length?: number,
 	}) {
 		super();
 
-		this.uws_server = App();
-
-		this.on<GroupPayload>(
-			OutcomePayloadEventType.GROUP,
-			(event) => {
-				this.publish(
-					`g-${event.group_id}`, // TODO: импортировать префикс
-					event.payload,
-				);
-			}
-		);
-
-		this.on<BroadcastPayload>(
-			OutcomePayloadEventType.BROADCAST,
-			(event) => {
-				this.publish(
-					'broadcast', // TODO: импортировать имя группы
-					event.payload,
-				);
-			}
-		);
-
-		this.uws_server.ws(
+		// TODO: add generic type to .ws() call
+		// eslint-disable-next-line new-cap
+		this.uws_server = App().ws(
 			path,
 			{
 				compression: 1,
-				maxPayloadLength: payload_max_length,
-				idleTimeout: IDLE_TIMEOUT,
-
-				upgrade: (response, request, context) => {
-					const headers: Map<string, string> = new Map();
+				idleTimeout: 400,
+				upgrade(response, request, context) {
+					const headers = new Map<string, string>();
+					// eslint-disable-next-line unicorn/no-array-for-each
 					request.forEach((key, value) => {
 						headers.set(key, value);
 					});
 
 					const url = new URL(
-						request.getUrl() + '?' + request.getQuery(),
-						'ws://' + headers.get('host'),
+						`${request.getUrl()}?${request.getQuery()}`,
+						`ws://${headers.get('host')}`,
 					);
 
 					response.upgrade(
@@ -88,38 +53,42 @@ export class ExtWSUwsServer extends ExtWS {
 					);
 				},
 				open: (uws_client) => {
-					const ip = new IP(uws_client.getRemoteAddress());
-					const url = uws_client.url;
-					const headers: Map<string, string> = uws_client.headers;
+					const ip = new IP(
+						uws_client.getRemoteAddress(),
+					);
+					const {
+						url,
+						headers,
+					} = uws_client;
 
 					const client = new ExtWSUwsClient(
 						this,
 						uws_client,
-						url,
-						headers,
-						ip,
+						{
+							url,
+							headers,
+							ip,
+						},
 					);
 
 					uws_client.id = client.id;
 					this.onConnect(client);
 				},
-				message: (uws_client, payload, is_binary) => {
+				message: (uws_client, payload) => {
 					const client = this.clients.get(uws_client.id);
-					const payload_str = Buffer.from(payload).toString('utf8');
+					if (client) {
+						const payload_str = Buffer.from(payload).toString('utf8');
 
-					if (client instanceof ExtWSClient) {
-						if (!is_binary) {
-							this.onMessage(
-								client,
-								payload_str,
-							);
-						}
+						this.onMessage(
+							client,
+							payload_str,
+						);
 					}
 				},
 				close: (uws_client) => {
 					const client = this.clients.get(uws_client.id);
 					if (client instanceof ExtWSClient) {
-						client.disconnect();
+						client.disconnect(true);
 					}
 				},
 			},
@@ -127,14 +96,21 @@ export class ExtWSUwsServer extends ExtWS {
 
 		this.uws_server.listen(
 			port,
-			() => {},
+			() => {
+				// do nothing
+			},
 		);
 	}
 
-	publish (channel: string, payload: string) {
+	protected publish(channel: string, payload: string) {
 		this.uws_server.publish(
 			channel,
 			payload,
 		);
 	}
+
+	// TODO: there is no close() method in uWebSockets.js 20.6.0
+	// close() {
+	// 	this.uws_server.close();
+	// }
 }

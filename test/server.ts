@@ -1,6 +1,7 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import {
 	ExtWSEvent,
-	OutcomePayloadEventType,
 	type ExtWSClient,
 } from '@extws/server';
 import { ExtWSUwsServer } from '../src/main.js';
@@ -18,7 +19,7 @@ extwsServer.on<ExtWSEvent<{ name: string }>>(
 				text: `Hello, ${event.data.name}!`,
 			},
 		);
-	}
+	},
 );
 
 export function testBroadcast() {

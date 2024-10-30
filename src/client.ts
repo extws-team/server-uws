@@ -9,21 +9,21 @@ export class ExtWSUwsClient extends ExtWSClient {
 	constructor(
 		server: ExtWSUwsServer,
 		uws_client: WebSocket,
-		url: URL,
-		headers: Map<string, string>,
-		ip: IP,
+		data: {
+			url: URL,
+			headers: Map<string, string>,
+			ip: IP,
+		},
 	) {
-		super(server, {
-			url,
-			headers,
-			ip,
-		});
+		super(
+			server,
+			data,
+		);
 		this.uws_client = uws_client;
 	}
 
 	addToGroup(group_id: string) {
 		try {
-			console.log(group_id)
 			this.uws_client.subscribe(group_id);
 		}
 		catch (error) {
@@ -55,11 +55,13 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	disconnect() {
-		try {
-				this.uws_client.close();
+	disconnect(is_disconnected: boolean = false) {
+		if (!is_disconnected) {
+			try {
+				this.uws_client.end();
+			}
+			catch {}
 		}
-		catch {}
 
 		super.disconnect();
 	}

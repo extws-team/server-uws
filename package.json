@@ -1,10 +1,7 @@
 {
-	"name": "extws-server-uws",
-	"version": "1.0.0",
-	"description": "Server for ExtWS server based on uWebSockets.",
-	"publishConfig": {
-		"--tag": "beta"
-	},
+	"name": "@extws/server-uws",
+	"version": "0.2.0-beta.1",
+	"description": "ExtWS server based on uWebSockets",
 	"main": "dist/esm/main.js",
 	"types": "dist/esm/main.d.ts",
 	"type": "module",
@@ -15,22 +12,23 @@
 		}
 	},
 	"engines": {
-		"node": ">=16.14"
+		"node": ">=16.14 <17"
 	},
 	"dependencies": {
-		"@extws/server": "0.2.0-beta.2",
-		"@types/ws": "^8.5.12",
+		"@extws/server": "^0.2.0-beta.3",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#a58e810e47a23696410f6073c8c905dc38f75da5"
-	},
-	"devDependencies": {
-		"@kirick/eslint-config": "latest",
-		"@types/node": "^16.14",
-		"typescript": "^5.6.3",
-		"vitest": "^2.1.4",
-		"ws": "^8.18.0"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.1.1"
+	},
+	"devDependencies": {
+		"@kirick/eslint-config": "latest",
+		"@types/node": ">=16.14",
+		"@types/ws": "^8.5.12",
+		"eslint": "9.10.0",
+		"typescript": "5.5.4",
+		"vitest": "0.34.6",
+		"ws": "^8.18.0"
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
@@ -38,7 +36,7 @@
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
-		"test": "vitest run --no-file-parallelism"
+		"test": "vitest run"
 	},
 	"repository": {
 		"type": "git",

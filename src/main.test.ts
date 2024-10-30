@@ -3,6 +3,7 @@ import {
 	describe,
 	test,
 	expect,
+	afterAll,
 } from 'vitest';
 import {
 	extwsServer,
@@ -20,22 +21,26 @@ const ERROR_TIMEOUT = 'Timeout: No message received within the specified time';
 /**
  * Wait for a message from the target WebSocket with a timeout.
  * @param target - The target WebSocket.
- * @param timeoutMs - The timeout in milliseconds (default 5000 ms).
  * @returns - A promise that resolves with the message or rejects on timeout.
  */
-function waitMessage(target: WebSocket, timeout_ms = 100000): Promise<string> {
+function waitMessage(target: WebSocket): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		const timeout = setTimeout(
 			() => {
 				reject(new Error(ERROR_TIMEOUT));
 			},
-			timeout_ms,
+			100,
 		);
 
 		target.once(
 			'message',
 			(data) => {
-				const message = Buffer.from(data).toString();
+				const message = data instanceof ArrayBuffer
+					? Buffer.from(data).toString()
+					: (data instanceof Buffer
+						? data.toString()
+						: Buffer.concat(data).toString());
+
 				clearTimeout(timeout);
 				resolve(message);
 			},
@@ -43,9 +48,14 @@ function waitMessage(target: WebSocket, timeout_ms = 100000): Promise<string> {
 	});
 }
 
-console.log(extwsServer)
-
-async function createClient(): Promise<{ websocket: WebSocket, extwsClient: ExtWSClient }> {
+/**
+ * Create a WebSocket client and get the corresponding ExtWSClient.
+ * @returns -
+ */
+async function createClient(): Promise<{
+	websocket: WebSocket,
+	extwsClient: ExtWSClient,
+}> {
 	const websocket = new WebSocket(WEBSOCKET_URL);
 	const init_message_promise = waitMessage(websocket);
 	await new Promise((resolve) => {
@@ -67,6 +77,15 @@ async function createClient(): Promise<{ websocket: WebSocket, extwsClient: ExtW
 }
 
 const client = await createClient();
+
+afterAll(async () => {
+	await new Promise((resolve) => {
+		setTimeout(resolve, 100);
+	});
+
+	// TODO:
+	// extwsServer.close();
+});
 
 describe('ExtWSBunServer', () => {
 	test('ping', async () => {
@@ -122,7 +141,7 @@ describe('groups', () => {
 		).toBe('4{"foo":"bar"}');
 	});
 
-	test('joined to another group', async () => {
+	test('joined to another group', () => {
 		const promise = waitMessage(client.websocket);
 
 		testGroupJoin(client.extwsClient, 'group');
@@ -131,7 +150,7 @@ describe('groups', () => {
 		expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
 	});
 
-	test('left', async () => {
+	test('left', () => {
 		const promise = waitMessage(client.websocket);
 
 		testGroupLeave(client.extwsClient, 'group');
@@ -164,12 +183,11 @@ describe('send to socket', () => {
 describe('disconnect', () => {
 	test('by server', async () => {
 		const promise = new Promise<boolean>((resolve) => {
-			client.websocket.addEventListener(
+			client.websocket.once(
 				'close',
 				(_) => {
 					resolve(true);
 				},
-				{ once: true },
 			);
 		});
 
