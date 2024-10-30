@@ -53,22 +53,9 @@ export class ExtWSUwsServer extends ExtWS {
 					);
 				},
 				open: (uws_client) => {
-					const ip = new IP(
-						uws_client.getRemoteAddress(),
-					);
-					const {
-						url,
-						headers,
-					} = uws_client;
-
 					const client = new ExtWSUwsClient(
 						this,
 						uws_client,
-						{
-							url,
-							headers,
-							ip,
-						},
 					);
 
 					uws_client.id = client.id;

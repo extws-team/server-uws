@@ -9,15 +9,16 @@ export class ExtWSUwsClient extends ExtWSClient {
 	constructor(
 		server: ExtWSUwsServer,
 		uws_client: WebSocket,
-		data: {
-			url: URL,
-			headers: Map<string, string>,
-			ip: IP,
-		},
 	) {
 		super(
 			server,
-			data,
+			{
+				url: uws_client.url,
+				headers: uws_client.headers,
+				ip: new IP(
+					uws_client.getRemoteAddress(),
+				),
+			},
 		);
 		this.uws_client = uws_client;
 	}
