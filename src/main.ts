@@ -6,7 +6,6 @@ import {
 	App,
 	type TemplatedApp,
 } from 'uWebSockets.js';
-import { IP } from '@kirick/ip';
 import { ExtWSUwsClient } from './client.js';
 
 export class ExtWSUwsServer extends ExtWS {
@@ -21,7 +20,7 @@ export class ExtWSUwsServer extends ExtWS {
 	}) {
 		super();
 
-		// TODO: add generic type to .ws() call
+		// TODO: add generic type to .ws() call after upgrade to modern uWebSockets.js
 		// eslint-disable-next-line new-cap
 		this.uws_server = App().ws(
 			path,
@@ -96,8 +95,8 @@ export class ExtWSUwsServer extends ExtWS {
 		);
 	}
 
-	// TODO: there is no close() method in uWebSockets.js 20.6.0
-	// close() {
-	// 	this.uws_server.close();
-	// }
+	close() {
+		// TODO: there is no close() method in uWebSockets.js 20.6.0
+		this.uws_server.close();
+	}
 }

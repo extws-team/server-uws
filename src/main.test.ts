@@ -78,13 +78,8 @@ async function createClient(): Promise<{
 
 const client = await createClient();
 
-afterAll(async () => {
-	await new Promise((resolve) => {
-		setTimeout(resolve, 100);
-	});
-
-	// TODO:
-	// extwsServer.close();
+afterAll(() => {
+	extwsServer.close();
 });
 
 describe('ExtWSBunServer', () => {

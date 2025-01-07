@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.2.0-beta.1",
+	"version": "0.2.0-beta.2",
 	"description": "ExtWS server based on uWebSockets",
 	"publishConfig": {
 		"access": "public"
@@ -15,20 +15,19 @@
 		}
 	},
 	"engines": {
-		"node": ">=16.14 <17"
+		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
 	},
 	"dependencies": {
 		"@extws/server": "^0.2.0-beta.3",
-		"uWebSockets.js": "github:uNetworking/uWebSockets.js#a58e810e47a23696410f6073c8c905dc38f75da5"
+		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
-		"@kirick/eslint-config": "latest",
+		"@kirick/eslint-config": "^0.1.30",
 		"@types/node": ">=16.14",
 		"@types/ws": "^8.5.12",
-		"eslint": "9.10.0",
 		"typescript": "5.5.4",
 		"vitest": "0.34.6",
 		"ws": "^8.18.0"
@@ -39,7 +38,7 @@
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
-		"test": "vitest run"
+		"test": "docker build -t test/extws-server-uws . && docker run --rm test/extws-server-uws"
 	},
 	"repository": {
 		"type": "git",
