@@ -1,12 +1,12 @@
-import {
-	ExtWS,
-	ExtWSClient,
-} from '@extws/server';
+import { ExtWS } from '@extws/server';
 import {
 	App,
 	type TemplatedApp,
 } from 'uWebSockets.js';
-import { ExtWSUwsClient } from './client.js';
+import {
+	ExtWSUwsClient,
+	type WebSocketUserData,
+} from './client.js';
 
 export class ExtWSUwsServer extends ExtWS {
 	private uws_server: TemplatedApp;
@@ -22,7 +22,7 @@ export class ExtWSUwsServer extends ExtWS {
 
 		// TODO: add generic type to .ws() call after upgrade to modern uWebSockets.js
 		// eslint-disable-next-line new-cap
-		this.uws_server = App().ws(
+		this.uws_server = App().ws<WebSocketUserData>(
 			path,
 			{
 				compression: 1,
@@ -39,7 +39,7 @@ export class ExtWSUwsServer extends ExtWS {
 						`ws://${headers.get('host')}`,
 					);
 
-					response.upgrade(
+					response.upgrade<WebSocketUserData>(
 						{
 							url,
 							headers,
@@ -57,24 +57,32 @@ export class ExtWSUwsServer extends ExtWS {
 						uws_client,
 					);
 
-					uws_client.id = client.id;
+					uws_client.getUserData().id = client.id;
 					this.onConnect(client);
 				},
 				message: (uws_client, payload) => {
-					const client = this.clients.get(uws_client.id);
-					if (client) {
-						const payload_str = Buffer.from(payload).toString('utf8');
+					const socket_id = uws_client.getUserData().id;
+					if (socket_id !== null) {
+						const client = this.clients.get(socket_id);
 
-						this.onMessage(
-							client,
-							payload_str,
-						);
+						if (client) {
+							const payload_str = Buffer.from(payload).toString('utf8');
+
+							this.onMessage(
+								client,
+								payload_str,
+							);
+						}
 					}
 				},
 				close: (uws_client) => {
-					const client = this.clients.get(uws_client.id);
-					if (client instanceof ExtWSClient) {
-						client.disconnect(true);
+					const socket_id = uws_client.getUserData().id;
+					if (socket_id !== null) {
+						const client = this.clients.get(socket_id);
+
+						if (client) {
+							client.disconnect(true);
+						}
 					}
 				},
 			},

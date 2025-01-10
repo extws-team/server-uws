@@ -3,18 +3,25 @@ import { WebSocket } from 'uWebSockets.js';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsServer } from './main.js';
 
-export class ExtWSUwsClient extends ExtWSClient {
-	private uws_client: WebSocket;
+export type WebSocketUserData = {
+	url: URL,
+	// headers: Headers,
+	headers: Map<string, string>,
+	id: string | null,
+};
 
+export class ExtWSUwsClient extends ExtWSClient {
 	constructor(
 		server: ExtWSUwsServer,
-		uws_client: WebSocket,
+		private uws_client: WebSocket<WebSocketUserData>,
 	) {
+		const user_data = uws_client.getUserData();
+
 		super(
 			server,
 			{
-				url: uws_client.url,
-				headers: uws_client.headers,
+				url: user_data.url,
+				headers: user_data.headers,
 				ip: new IP(
 					uws_client.getRemoteAddress(),
 				),
