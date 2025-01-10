@@ -28,6 +28,7 @@
 		"@kirick/eslint-config": "^0.1.30",
 		"@types/node": ">=16.14",
 		"@types/ws": "^8.5.12",
+		"eslint": "^9.8.0",
 		"typescript": "5.5.4",
 		"vitest": "0.34.6",
 		"ws": "^8.18.0"
