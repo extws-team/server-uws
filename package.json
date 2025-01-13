@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.2.0-beta.3",
+	"version": "0.2.0-beta.4",
 	"description": "ExtWS server based on uWebSockets.js",
 	"publishConfig": {
 		"access": "public"
@@ -18,7 +18,7 @@
 		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
 	},
 	"dependencies": {
-		"@extws/server": "^0.2.0-beta.3",
+		"@extws/server": "^0.2.0-beta.9",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
 	},
 	"peerDependencies": {

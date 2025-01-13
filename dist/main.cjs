@@ -142,5 +142,6 @@ class ExtWSUwsServer extends import_server2.ExtWS {
   }
   close() {
     this.uws_server.close();
+    return Promise.resolve();
   }
 }

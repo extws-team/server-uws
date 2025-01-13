@@ -6,5 +6,5 @@ export declare class ExtWSUwsServer extends ExtWS {
         path?: string;
     });
     protected publish(channel: string, payload: string): void;
-    close(): void;
+    close(): Promise<void>;
 }
