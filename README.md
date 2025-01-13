@@ -29,7 +29,7 @@ import { ExtWSUwsServer } from '@extws/server-uws';
 
 // Start the server.
 const server = new ExtWSUwsServer({
-	port: 8080,
+  port: 8080,
 });
 ```
 
@@ -37,8 +37,8 @@ By default, the server listens for WebSocket connections for the `/ws` path. If 
 
 ```typescript
 const server = new ExtWSUwsServer({
-	path: '/extws',
-	port: 8080,
+  path: '/extws',
+  port: 8080,
 });
 ```
 
