@@ -10,13 +10,13 @@ export const extwsServer = new ExtWSUwsServer({
 	port: 8080,
 });
 
-extwsServer.on<ExtWSEvent<{ name: string }>>(
+extwsServer.on(
 	'hello',
-	(event) => {
+	(event: ExtWSEvent<{ name: string }>) => {
 		event.client.send(
 			'hello',
 			{
-				text: `Hello, ${event.data.name}!`,
+				text: `Hello, ${event.detail.name}!`,
 			},
 		);
 	},

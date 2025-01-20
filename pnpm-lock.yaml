@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@extws/server':
-        specifier: ^0.2.0-beta.9
-        version: 0.2.0-beta.9(@kirick/ip@0.1.1)
+        specifier: ^0.2.1-beta.1
+        version: 0.2.1-beta.1(@kirick/ip@0.1.1)
       '@kirick/ip':
         specifier: ^0.1.1
         version: 0.1.1
@@ -222,8 +222,8 @@ packages:
     resolution: {integrity: sha512-autAXT203ixhqei9xt+qkYOvY8l6LAFIdT2UXc/RPNeUVfqRF1BV94GTJyVPFKT8nFM6MyVJhjLj9E8JWvf5zQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@extws/server@0.2.0-beta.9':
-    resolution: {integrity: sha512-DdltTvafrjFlKyGnzXNmHZcmWAcgIN/fHdtVBeDb3EP4akHl02nKONB6TFcmLqAAlzw/hSyJpFpam9JpWui0Ag==}
+  '@extws/server@0.2.1-beta.1':
+    resolution: {integrity: sha512-lXM6rJ1PXkeR3j/BaO+Yod2BkV5SufJ8HaW7bBfhJAqobnUPJawNvZX51Zq6whFN8dKAmoMjFMznP75oHAvYVw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@kirick/ip': ^0.1.1
@@ -967,8 +967,8 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  neoevents@0.1.0:
-    resolution: {integrity: sha512-63c4L5fitWhtZIxAwMDUlwq0/TMOVmiKl32E5SwfyHuZd+8kCMS/wd7zm6EnCxHjURrThQmYqgV89hc+6esT1g==}
+  neoevents@0.2.0:
+    resolution: {integrity: sha512-M1SStjHyA0ycBmbUg57RZtjiNo2n0JalPAx/JTJ0qtqJEKJu+M5OFk9Zof2vNrwEgMIk78uDFf/j5MGB6caXwA==}
     engines: {node: '>=16'}
 
   node-releases@2.0.18:
@@ -1518,11 +1518,11 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@extws/server@0.2.0-beta.9(@kirick/ip@0.1.1)':
+  '@extws/server@0.2.1-beta.1(@kirick/ip@0.1.1)':
     dependencies:
       '@kirick/ip': 0.1.1
       nanoid: 4.0.2
-      neoevents: 0.1.0
+      neoevents: 0.2.0
 
   '@humanwhocodes/module-importer@1.0.1': {}
 
@@ -2292,7 +2292,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  neoevents@0.1.0: {}
+  neoevents@0.2.0: {}
 
   node-releases@2.0.18: {}
 

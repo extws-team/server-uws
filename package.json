@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.2.0-beta.4",
+	"version": "0.2.1-beta.1",
 	"description": "ExtWS server based on uWebSockets.js",
 	"publishConfig": {
 		"access": "public"
@@ -18,7 +18,7 @@
 		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
 	},
 	"dependencies": {
-		"@extws/server": "^0.2.0-beta.9",
+		"@extws/server": "^0.2.1-beta.1",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
 	},
 	"peerDependencies": {
@@ -35,7 +35,6 @@
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
-		"# build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
 		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs --packages=external",
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
