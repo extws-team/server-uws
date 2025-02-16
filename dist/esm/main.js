@@ -1,6 +1,7 @@
 import { ExtWS } from '@extws/server';
 import { App, } from 'uWebSockets.js';
 import { ExtWSUwsClient, } from './client.js';
+import { IP } from '@kirick/ip';
 export class ExtWSUwsServer extends ExtWS {
     uws_server;
     constructor({ port, path = '/ws', ...options_rest }) {
@@ -16,7 +17,11 @@ export class ExtWSUwsServer extends ExtWS {
                     headers.set(key, value);
                 });
                 const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get('host')}`);
-                const upgrade_response = await this.options?.onBeforeUpgrade?.(url, headers);
+                const upgrade_response = await this.options?.onBeforeUpgrade?.({
+                    url,
+                    headers,
+                    ip: new IP(response.getRemoteAddress()),
+                });
                 if (upgrade_response) {
                     response.writeStatus(String(upgrade_response.status));
                     if (upgrade_response.headers) {

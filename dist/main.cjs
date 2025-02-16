@@ -87,6 +87,8 @@ class ExtWSUwsClient extends import_server.ExtWSClient {
 }
 
 // src/main.ts
+var import_ip2 = require("@kirick/ip");
+
 class ExtWSUwsServer extends import_server2.ExtWS {
   uws_server;
   constructor({
@@ -104,7 +106,11 @@ class ExtWSUwsServer extends import_server2.ExtWS {
           headers.set(key, value);
         });
         const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
-        const upgrade_response = await this.options?.onBeforeUpgrade?.(url, headers);
+        const upgrade_response = await this.options?.onBeforeUpgrade?.({
+          url,
+          headers,
+          ip: new import_ip2.IP(response.getRemoteAddress())
+        });
         if (upgrade_response) {
           response.writeStatus(String(upgrade_response.status));
           if (upgrade_response.headers) {
