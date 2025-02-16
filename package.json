@@ -18,7 +18,7 @@
 		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
 	},
 	"dependencies": {
-		"@extws/server": "^0.2.1-beta.1",
+		"@extws/server": "github:extws-team/server#5f319c66fa887a7c98bc4f7e2f8cf114637a684d",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
 	},
 	"peerDependencies": {
@@ -29,7 +29,8 @@
 		"@types/node": ">=16.14",
 		"@types/ws": "^8.5.12",
 		"eslint": "9.10.0",
-		"typescript": "5.5.4",
+		"node-fetch": "^3.3.2",
+		"typescript": "5.7.3",
 		"vitest": "0.34.6",
 		"ws": "^8.18.0"
 	},

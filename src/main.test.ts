@@ -1,10 +1,12 @@
 import { type ExtWSClient } from '@extws/server';
+import fetch from 'node-fetch';
 import {
 	describe,
 	test,
 	expect,
 	afterAll,
 } from 'vitest';
+import { WebSocket } from 'ws';
 import {
 	extwsServer,
 	testBroadcast,
@@ -13,7 +15,6 @@ import {
 	testSendToGroup,
 	testSendToSocket,
 } from '../test/server.js';
-import { WebSocket } from 'ws';
 
 const WEBSOCKET_URL = 'ws://localhost:8080/ws';
 const ERROR_TIMEOUT = 'Timeout: No message received within the specified time';
@@ -37,9 +38,9 @@ function waitMessage(target: WebSocket): Promise<string> {
 			(data) => {
 				const message = data instanceof ArrayBuffer
 					? Buffer.from(data).toString()
-					: (data instanceof Buffer
-						? data.toString()
-						: Buffer.concat(data).toString());
+					: (Array.isArray(data)
+						? Buffer.concat(data).toString()
+						: data.toString());
 
 				clearTimeout(timeout);
 				resolve(message);
@@ -83,6 +84,22 @@ afterAll(() => {
 });
 
 describe('ExtWSBunServer', () => {
+	test('onBeforeUpgrade hook', async () => {
+		const response = await fetch(
+			`${WEBSOCKET_URL.replace('ws://', 'http://')}?drop=1`,
+			{
+				headers: {
+					'Connection': 'Upgrade',
+					'Upgrade': 'websocket',
+					'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
+					'Sec-WebSocket-Version': '13',
+				},
+			},
+		);
+
+		expect(response.status).toBe(400);
+	});
+
 	test('ping', async () => {
 		const promise = waitMessage(client.websocket);
 

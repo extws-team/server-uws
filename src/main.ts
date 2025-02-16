@@ -1,4 +1,5 @@
 import { ExtWS } from '@extws/server';
+import { type ExtWSOnBeforeUpgradeHandler } from '@extws/server/dev';
 import {
 	App,
 	type TemplatedApp,
@@ -14,11 +15,13 @@ export class ExtWSUwsServer extends ExtWS {
 	constructor({
 		port,
 		path = '/ws',
+		...options_rest
 	}: {
 		port: number,
 		path?: string,
+		onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler,
 	}) {
-		super();
+		super(options_rest);
 
 		// eslint-disable-next-line new-cap
 		this.uws_server = App().ws<WebSocketUserData>(
@@ -26,7 +29,7 @@ export class ExtWSUwsServer extends ExtWS {
 			{
 				compression: 1,
 				idleTimeout: 400,
-				upgrade(response, request, context) {
+				upgrade: async (response, request, context) => {
 					const headers = new Map<string, string>();
 					// eslint-disable-next-line unicorn/no-array-for-each
 					request.forEach((key, value) => {
@@ -38,17 +41,35 @@ export class ExtWSUwsServer extends ExtWS {
 						`ws://${headers.get('host')}`,
 					);
 
-					response.upgrade<WebSocketUserData>(
-						{
-							url,
-							headers,
-							id: null,
-						},
-						headers.get('sec-websocket-key') ?? '',
-						headers.get('sec-websocket-protocol') ?? '',
-						headers.get('sec-websocket-extensions') ?? '',
-						context,
-					);
+					const upgrade_response = await this.options?.onBeforeUpgrade?.(url, headers);
+					if (upgrade_response) {
+						response.writeStatus(
+							String(upgrade_response.status),
+						);
+
+						if (upgrade_response.headers) {
+							for (const [ key, value ] of upgrade_response.headers.entries()) {
+								response.writeHeader(key, value);
+							}
+						}
+
+						response.write(upgrade_response.body ?? '');
+
+						response.end();
+					}
+					else {
+						response.upgrade<WebSocketUserData>(
+							{
+								url,
+								headers,
+								id: null,
+							},
+							headers.get('sec-websocket-key') ?? '',
+							headers.get('sec-websocket-protocol') ?? '',
+							headers.get('sec-websocket-extensions') ?? '',
+							context,
+						);
+					}
 				},
 				open: (uws_client) => {
 					const client = new ExtWSUwsClient(

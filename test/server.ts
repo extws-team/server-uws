@@ -8,6 +8,13 @@ import { ExtWSUwsServer } from '../src/main.js';
 
 export const extwsServer = new ExtWSUwsServer({
 	port: 8080,
+	onBeforeUpgrade(url: URL) {
+		if (url.searchParams.has('drop')) {
+			return {
+				status: 400,
+			};
+		}
+	},
 });
 
 extwsServer.on(
