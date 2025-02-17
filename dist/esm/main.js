@@ -38,8 +38,10 @@ export class ExtWSUwsServer extends ExtWS {
                         if (upgrade_response) {
                             response.writeStatus(String(upgrade_response.status));
                             if (upgrade_response.headers) {
-                                for (const [key, value] of upgrade_response.headers.entries()) {
-                                    response.writeHeader(key, value);
+                                for (const [key, value] of Object.entries(upgrade_response.headers)) {
+                                    if (value !== undefined) {
+                                        response.writeHeader(key, value);
+                                    }
                                 }
                             }
                             response.write(upgrade_response.body ?? '');

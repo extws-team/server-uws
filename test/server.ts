@@ -16,6 +16,9 @@ export const extwsServer = new ExtWSUwsServer({
 		if (url.searchParams.has('drop')) {
 			return {
 				status: 400,
+				headers: {
+					'x-test': 'test',
+				},
 			};
 		}
 	},
