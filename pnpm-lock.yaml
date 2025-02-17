@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@extws/server':
-        specifier: github:extws-team/server#868a35e5b87226a76722e4f68d0303f9ccc4c606
-        version: https://codeload.github.com/extws-team/server/tar.gz/868a35e5b87226a76722e4f68d0303f9ccc4c606(@kirick/ip@0.1.1)
+        specifier: github:extws-team/server#dev-kirick
+        version: https://codeload.github.com/extws-team/server/tar.gz/d890fe2639b44b1e65d440ea493e817bb88c5be1(@kirick/ip@0.1.1)
       '@kirick/ip':
         specifier: ^0.1.1
         version: 0.1.1
@@ -225,8 +225,8 @@ packages:
     resolution: {integrity: sha512-autAXT203ixhqei9xt+qkYOvY8l6LAFIdT2UXc/RPNeUVfqRF1BV94GTJyVPFKT8nFM6MyVJhjLj9E8JWvf5zQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/868a35e5b87226a76722e4f68d0303f9ccc4c606':
-    resolution: {tarball: https://codeload.github.com/extws-team/server/tar.gz/868a35e5b87226a76722e4f68d0303f9ccc4c606}
+  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/d890fe2639b44b1e65d440ea493e817bb88c5be1':
+    resolution: {tarball: https://codeload.github.com/extws-team/server/tar.gz/d890fe2639b44b1e65d440ea493e817bb88c5be1}
     version: 0.2.1-dev
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -975,9 +975,9 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@4.0.2:
-    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
-    engines: {node: ^14 || ^16 || >=18}
+  nanoid@3.3.8:
+    resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
   natural-compare@1.4.0:
@@ -1546,10 +1546,10 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/868a35e5b87226a76722e4f68d0303f9ccc4c606(@kirick/ip@0.1.1)':
+  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/d890fe2639b44b1e65d440ea493e817bb88c5be1(@kirick/ip@0.1.1)':
     dependencies:
       '@kirick/ip': 0.1.1
-      nanoid: 4.0.2
+      nanoid: 3.3.8
       neoevents: 0.2.0
 
   '@humanwhocodes/module-importer@1.0.1': {}
@@ -2327,7 +2327,7 @@ snapshots:
 
   nanoid@3.3.7: {}
 
-  nanoid@4.0.2: {}
+  nanoid@3.3.8: {}
 
   natural-compare@1.4.0: {}
 
