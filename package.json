@@ -38,6 +38,7 @@
 		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
 		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs --packages=external",
 		"build:ts": "rm -r dist/esm ; tsc",
+		"check": "bun run lint && bun run build && bun run test",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"test": "docker build -t test/extws-server-uws . && docker run --rm test/extws-server-uws"
 	},

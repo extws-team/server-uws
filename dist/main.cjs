@@ -107,27 +107,34 @@ class ExtWSUwsServer extends import_server2.ExtWS {
           headers.set(key, value);
         });
         const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
-        const upgrade_response = await this.options?.onBeforeUpgrade?.({
-          url,
-          headers,
-          ip: new import_ip2.IP(response.getRemoteAddress())
-        });
-        if (upgrade_response) {
-          response.writeStatus(String(upgrade_response.status));
-          if (upgrade_response.headers) {
-            for (const [key, value] of upgrade_response.headers.entries()) {
-              response.writeHeader(key, value);
-            }
-          }
-          response.write(upgrade_response.body ?? "");
-          response.end();
-        } else {
-          response.upgrade({
+        try {
+          const upgrade_response = await this.options?.onBeforeUpgrade?.({
             url,
             headers,
-            id: null
+            ip: new import_ip2.IP(response.getRemoteAddress())
+          });
+          if (upgrade_response) {
+            response.writeStatus(String(upgrade_response.status));
+            if (upgrade_response.headers) {
+              for (const [key, value] of upgrade_response.headers.entries()) {
+                response.writeHeader(key, value);
+              }
+            }
+            response.write(upgrade_response.body ?? "");
+            response.end();
+            return;
+          }
+          response.upgrade({
+            id: "",
+            url,
+            headers
           }, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
+          return;
+        } catch (error) {
+          console.error(error);
         }
+        response.writeStatus("500");
+        response.end();
       },
       open: (uws_client) => {
         const client = new ExtWSUwsClient(this, uws_client);

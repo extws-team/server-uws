@@ -4,10 +4,10 @@ import { IP } from '@kirick/ip';
 import { ExtWSUwsServer } from './main.js';
 
 export type WebSocketUserData = {
+	id: string,
 	url: URL,
 	// headers: Headers,
 	headers: Map<string, string>,
-	id: string | null,
 };
 
 export class ExtWSUwsClient extends ExtWSClient {

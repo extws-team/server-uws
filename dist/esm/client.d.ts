@@ -2,9 +2,9 @@ import { ExtWSClient } from '@extws/server';
 import { WebSocket } from 'uWebSockets.js';
 import { ExtWSUwsServer } from './main.js';
 export type WebSocketUserData = {
+    id: string;
     url: URL;
     headers: Map<string, string>;
-    id: string | null;
 };
 export declare class ExtWSUwsClient extends ExtWSClient {
     private uws_client;

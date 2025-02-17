@@ -42,39 +42,51 @@ export class ExtWSUwsServer extends ExtWS {
 						`ws://${headers.get('host')}`,
 					);
 
-					const upgrade_response = await this.options?.onBeforeUpgrade?.({
-						url,
-						headers,
-						ip: new IP(response.getRemoteAddress()),
-					});
-					if (upgrade_response) {
-						response.writeStatus(
-							String(upgrade_response.status),
-						);
+					try {
+						const upgrade_response = await this.options?.onBeforeUpgrade?.({
+							url,
+							headers,
+							ip: new IP(response.getRemoteAddress()),
+						});
+						if (upgrade_response) {
+							response.writeStatus(
+								String(upgrade_response.status),
+							);
 
-						if (upgrade_response.headers) {
-							for (const [ key, value ] of upgrade_response.headers.entries()) {
-								response.writeHeader(key, value);
+							if (upgrade_response.headers) {
+								for (const [ key, value ] of upgrade_response.headers.entries()) {
+									response.writeHeader(key, value);
+								}
 							}
+
+							response.write(upgrade_response.body ?? '');
+
+							response.end();
+
+							return;
 						}
 
-						response.write(upgrade_response.body ?? '');
-
-						response.end();
-					}
-					else {
 						response.upgrade<WebSocketUserData>(
 							{
+								id: '',
 								url,
 								headers,
-								id: null,
 							},
 							headers.get('sec-websocket-key') ?? '',
 							headers.get('sec-websocket-protocol') ?? '',
 							headers.get('sec-websocket-extensions') ?? '',
 							context,
 						);
+
+						return;
 					}
+					catch (error) {
+						// eslint-disable-next-line no-console
+						console.error(error);
+					}
+
+					response.writeStatus('500');
+					response.end();
 				},
 				open: (uws_client) => {
 					const client = new ExtWSUwsClient(
