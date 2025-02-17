@@ -77,3 +77,4 @@ export class ExtWSUwsServer extends ExtWS {
         return Promise.resolve();
     }
 }
+export { ExtWSUwsClient } from './client.js';

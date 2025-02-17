@@ -10,3 +10,4 @@ export declare class ExtWSUwsServer extends ExtWS {
     protected publish(channel: string, payload: string): void;
     close(): Promise<void>;
 }
+export { ExtWSUwsClient } from './client.js';

@@ -29,7 +29,8 @@ var __export = (target, all) => {
 // src/main.ts
 var exports_main = {};
 __export(exports_main, {
-  ExtWSUwsServer: () => ExtWSUwsServer
+  ExtWSUwsServer: () => ExtWSUwsServer,
+  ExtWSUwsClient: () => ExtWSUwsClient
 });
 module.exports = __toCommonJS(exports_main);
 var import_server2 = require("@extws/server");

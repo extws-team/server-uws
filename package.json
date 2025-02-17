@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.2.1-beta.1",
+	"version": "0.2.1-dev",
 	"description": "ExtWS server based on uWebSockets.js",
 	"publishConfig": {
 		"access": "public"
@@ -39,7 +39,6 @@
 		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs --packages=external",
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
-		"publish:npm": "bun run lint && bun run build && bun run test && npm publish",
 		"test": "docker build -t test/extws-server-uws . && docker run --rm test/extws-server-uws"
 	},
 	"repository": {
