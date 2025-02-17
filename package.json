@@ -18,7 +18,7 @@
 		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
 	},
 	"dependencies": {
-		"@extws/server": "github:extws-team/server#717a30667bcb05020f708ff4c7f3691d531b09f1",
+		"@extws/server": "github:extws-team/server#868a35e5b87226a76722e4f68d0303f9ccc4c606",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
 	},
 	"peerDependencies": {
