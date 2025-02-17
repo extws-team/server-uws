@@ -99,42 +99,54 @@ class ExtWSUwsServer extends import_server2.ExtWS {
   }) {
     super(options_rest);
     this.uws_server = import_uWebSockets.App().ws(path, {
-      compression: 1,
+      compression: import_uWebSockets.SHARED_COMPRESSOR,
       idleTimeout: 400,
-      upgrade: async (response, request, context) => {
+      upgrade: (response, request, context) => {
         const headers = new Map;
         request.forEach((key, value) => {
           headers.set(key, value);
         });
         const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
-        try {
-          const upgrade_response = await this.options?.onBeforeUpgrade?.({
-            url,
-            headers,
-            ip: new import_ip2.IP(response.getRemoteAddress())
-          });
-          if (upgrade_response) {
-            response.writeStatus(String(upgrade_response.status));
-            if (upgrade_response.headers) {
-              for (const [key, value] of upgrade_response.headers.entries()) {
-                response.writeHeader(key, value);
-              }
-            }
-            response.write(upgrade_response.body ?? "");
-            response.end();
+        const ip = new import_ip2.IP(response.getRemoteAddress());
+        let is_aborted = false;
+        response.onAborted(() => {
+          is_aborted = true;
+        });
+        Promise.resolve().then(() => this.options?.onBeforeUpgrade?.({
+          url,
+          headers,
+          ip
+        })).then((upgrade_response) => {
+          if (is_aborted) {
             return;
           }
-          response.upgrade({
-            id: "",
-            url,
-            headers
-          }, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
-          return;
-        } catch (error) {
-          console.error(error);
-        }
-        response.writeStatus("500");
-        response.end();
+          response.cork(() => {
+            if (upgrade_response) {
+              response.writeStatus(String(upgrade_response.status));
+              if (upgrade_response.headers) {
+                for (const [key, value] of upgrade_response.headers.entries()) {
+                  response.writeHeader(key, value);
+                }
+              }
+              response.write(upgrade_response.body ?? "");
+              response.end();
+            } else {
+              response.upgrade({
+                id: "",
+                url,
+                headers
+              }, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
+            }
+          });
+        }).catch((error) => {
+          console.error("Upgrade handler error:", error);
+          if (!is_aborted) {
+            response.cork(() => {
+              response.writeStatus("500");
+              response.end();
+            });
+          }
+        });
       },
       open: (uws_client) => {
         const client = new ExtWSUwsClient(this, uws_client);

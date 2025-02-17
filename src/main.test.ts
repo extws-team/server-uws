@@ -83,7 +83,7 @@ afterAll(() => {
 	extwsServer.close();
 });
 
-describe('ExtWSBunServer', () => {
+describe('ExtWSUwsServer', () => {
 	test('onBeforeUpgrade hook', async () => {
 		const response = await fetch(
 			`${WEBSOCKET_URL.replace('ws://', 'http://')}?drop=1`,
@@ -134,12 +134,12 @@ describe('broadcast', () => {
 });
 
 describe('groups', () => {
-	test('before join any', () => {
+	test('before join any', async () => {
 		const promise = waitMessage(client.websocket);
 
 		testSendToGroup('group');
 
-		expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
+		await expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
 	});
 
 	test('joined', async () => {
@@ -153,22 +153,22 @@ describe('groups', () => {
 		).toBe('4{"foo":"bar"}');
 	});
 
-	test('joined to another group', () => {
+	test('joined to another group', async () => {
 		const promise = waitMessage(client.websocket);
 
 		testGroupJoin(client.extwsClient, 'group');
 		testSendToGroup('group_another');
 
-		expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
+		await expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
 	});
 
-	test('left', () => {
+	test('left', async () => {
 		const promise = waitMessage(client.websocket);
 
 		testGroupLeave(client.extwsClient, 'group');
 		testSendToGroup('group');
 
-		expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
+		await expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
 	});
 });
 
@@ -183,12 +183,12 @@ describe('send to socket', () => {
 		).toBe('4{"foo":"bar"}');
 	});
 
-	test('to non-existing client', () => {
+	test('to non-existing client', async () => {
 		const promise = waitMessage(client.websocket);
 
 		testSendToSocket('777');
 
-		expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
+		await expect(promise).rejects.toThrowError(ERROR_TIMEOUT);
 	});
 });
 

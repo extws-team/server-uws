@@ -8,7 +8,11 @@ import { ExtWSUwsServer } from '../src/main.js';
 
 export const extwsServer = new ExtWSUwsServer({
 	port: 8080,
-	onBeforeUpgrade({ url }) {
+	async onBeforeUpgrade({ url }) {
+		await new Promise((resolve) => {
+			setTimeout(resolve, 1);
+		});
+
 		if (url.searchParams.has('drop')) {
 			return {
 				status: 400,
