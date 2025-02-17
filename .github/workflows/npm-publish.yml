@@ -78,7 +78,7 @@ jobs:
       # FIXME: revert this
       - name: Install dependencies
         # run: bun install --frozen-lockfile
-        run: pnpm i --frozen-lockfile
+        run: pnpm i --frozen-lockfile && pnpm approve-builds
 
       - name: Lint code
         run: bun run lint
