@@ -1,8 +1,5 @@
 import { ExtWS } from '@extws/server';
-import type {
-	ExtWSHttpResponse,
-	ExtWSOnBeforeUpgradeHandler,
-} from '@extws/server/dev';
+import type { ExtWSOnBeforeUpgradeHandler } from '@extws/server/dev';
 import {
 	App,
 	SHARED_COMPRESSOR,

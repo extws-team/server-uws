@@ -52,17 +52,17 @@ class ExtWSUwsClient extends import_server.ExtWSClient {
     this.uws_client = uws_client;
     this.uws_client = uws_client;
   }
-  addToGroup(group_id) {
+  addToChannel(channel_id) {
     try {
-      this.uws_client.subscribe(group_id);
+      this.uws_client.subscribe(channel_id);
     } catch (error) {
       console.error(error);
       this.disconnect();
     }
   }
-  removeFromGroup(group_id) {
+  removeFromChannel(channel_id) {
     try {
-      this.uws_client.unsubscribe(group_id);
+      this.uws_client.unsubscribe(channel_id);
     } catch (error) {
       console.error(error);
       this.disconnect();

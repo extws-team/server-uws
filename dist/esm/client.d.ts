@@ -9,8 +9,8 @@ export type WebSocketUserData = {
 export declare class ExtWSUwsClient extends ExtWSClient {
     private uws_client;
     constructor(server: ExtWSUwsServer, uws_client: WebSocket<WebSocketUserData>);
-    addToGroup(group_id: string): void;
-    removeFromGroup(group_id: string): void;
+    addToChannel(channel_id: string): void;
+    removeFromChannel(channel_id: string): void;
     sendPayload(payload: string): void;
     disconnect(is_disconnected?: boolean): void;
 }
