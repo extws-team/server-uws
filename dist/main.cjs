@@ -80,8 +80,7 @@ class ExtWSUwsClient extends import_server.ExtWSClient {
     if (!is_disconnected) {
       try {
         this.uws_client.end();
-      } catch {
-      }
+      } catch {}
     }
     super.disconnect();
   }
@@ -95,12 +94,18 @@ class ExtWSUwsServer extends import_server2.ExtWS {
   constructor({
     port,
     path = "/ws",
+    idleTimeout = 400000,
+    maxBackpressure,
+    maxPayloadLength,
     ...options_rest
   }) {
     super(options_rest);
     this.uws_server = import_uWebSockets.App().ws(path, {
       compression: import_uWebSockets.SHARED_COMPRESSOR,
-      idleTimeout: 400,
+      idleTimeout: Math.floor(idleTimeout / 1000),
+      maxBackpressure,
+      maxLifetime: 0,
+      maxPayloadLength,
       upgrade: (response, request, context) => {
         const headers = new Map;
         request.forEach((key, value) => {
@@ -175,8 +180,7 @@ class ExtWSUwsServer extends import_server2.ExtWS {
         }
       }
     });
-    this.uws_server.listen(port, () => {
-    });
+    this.uws_server.listen(port, () => {});
   }
   publish(channel, payload) {
     this.uws_server.publish(channel, payload);

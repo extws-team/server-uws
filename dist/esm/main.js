@@ -5,12 +5,15 @@ import { IP } from '@kirick/ip';
 export class ExtWSUwsServer extends ExtWS {
     uws_server;
     // eslint-disable-next-line max-lines-per-function
-    constructor({ port, path = '/ws', ...options_rest }) {
+    constructor({ port, path = '/ws', idleTimeout = 400_000, maxBackpressure, maxPayloadLength, ...options_rest }) {
         super(options_rest);
         // eslint-disable-next-line new-cap
         this.uws_server = App().ws(path, {
             compression: SHARED_COMPRESSOR,
-            idleTimeout: 400,
+            idleTimeout: Math.floor(idleTimeout / 1000),
+            maxBackpressure,
+            maxLifetime: 0,
+            maxPayloadLength,
             upgrade: (response, request, context) => {
                 const headers = new Map();
                 // eslint-disable-next-line unicorn/no-array-for-each
