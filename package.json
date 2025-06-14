@@ -22,7 +22,7 @@
 		"node": "^22 || ^23 || ^24"
 	},
 	"dependencies": {
-		"@extws/server": "github:extws-team/server#d266a08a4cbf32270d2b0530f2a9504ec6c90bf6",
+		"@extws/server": "github:extws-team/server#9625673278a8a7539883bf0b6afdbdd44f9c9402",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
 	},
 	"peerDependencies": {

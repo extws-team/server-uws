@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@extws/server':
-        specifier: github:extws-team/server#d266a08a4cbf32270d2b0530f2a9504ec6c90bf6
-        version: https://codeload.github.com/extws-team/server/tar.gz/d266a08a4cbf32270d2b0530f2a9504ec6c90bf6(@kirick/ip@0.1.1)
+        specifier: github:extws-team/server#9625673278a8a7539883bf0b6afdbdd44f9c9402
+        version: https://codeload.github.com/extws-team/server/tar.gz/9625673278a8a7539883bf0b6afdbdd44f9c9402(@kirick/ip@0.1.1)
       '@kirick/ip':
         specifier: ^0.1.1
         version: 0.1.1
@@ -264,8 +264,8 @@ packages:
     resolution: {integrity: sha512-autAXT203ixhqei9xt+qkYOvY8l6LAFIdT2UXc/RPNeUVfqRF1BV94GTJyVPFKT8nFM6MyVJhjLj9E8JWvf5zQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/d266a08a4cbf32270d2b0530f2a9504ec6c90bf6':
-    resolution: {tarball: https://codeload.github.com/extws-team/server/tar.gz/d266a08a4cbf32270d2b0530f2a9504ec6c90bf6}
+  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/9625673278a8a7539883bf0b6afdbdd44f9c9402':
+    resolution: {tarball: https://codeload.github.com/extws-team/server/tar.gz/9625673278a8a7539883bf0b6afdbdd44f9c9402}
     version: 0.3.0-dev
     engines: {node: '>=20'}
     peerDependencies:
@@ -1861,7 +1861,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/d266a08a4cbf32270d2b0530f2a9504ec6c90bf6(@kirick/ip@0.1.1)':
+  '@extws/server@https://codeload.github.com/extws-team/server/tar.gz/9625673278a8a7539883bf0b6afdbdd44f9c9402(@kirick/ip@0.1.1)':
     dependencies:
       '@kirick/ip': 0.1.1
       nanoid: 3.3.8
