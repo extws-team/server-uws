@@ -62,6 +62,7 @@ export class ExtWSUwsServer extends ExtWS {
 				maxLifetime: 0,
 				maxPayloadLength,
 				upgrade: (response, request, context) => {
+					// FIXME: use Headers
 					const headers = new Map<string, string>();
 					// eslint-disable-next-line unicorn/no-array-for-each
 					request.forEach((key, value) => {
@@ -182,14 +183,14 @@ export class ExtWSUwsServer extends ExtWS {
 		);
 	}
 
-	protected publish(channel: string, payload: string) {
+	protected override publish(channel: string, payload: string): void {
 		this.uws_server.publish(
 			channel,
 			payload,
 		);
 	}
 
-	close() {
+	override close(): Promise<void> {
 		this.uws_server.close();
 
 		return Promise.resolve();

@@ -6,41 +6,46 @@
 		"access": "public"
 	},
 	"type": "module",
-	"main": "dist/esm/main.js",
-	"types": "dist/esm/main.d.ts",
+	"main": "dist/main.js",
+	"types": "dist/main.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/esm/main.js",
+			"types": {
+				"import": "./dist/main.d.ts",
+				"require": "./dist/main.d.cts"
+			},
+			"import": "./dist/main.js",
 			"require": "./dist/main.cjs"
 		}
 	},
 	"engines": {
-		"node": ">=16.14 <17 || >=18 <19 || >=20 <21 || >=21 <22"
+		"node": "~20 || ~22 || ~23 || ~24"
 	},
 	"dependencies": {
 		"@extws/server": "github:extws-team/server#36d07e1f69ef0360f703bc85619c47d8099d490e",
-		"uWebSockets.js": "github:uNetworking/uWebSockets.js#c10b47c350cc97c299c6b4a07a98abb628704c71"
+		"uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "0.1.30",
-		"@types/node": ">=16.14",
+		"@types/node": "^20",
 		"@types/ws": "^8.5.12",
 		"eslint": "9.10.0",
 		"node-fetch": "^3.3.2",
-		"typescript": "5.7.3",
-		"vitest": "0.34.6",
+		"publint": "0.3.12",
+		"tsdown": "0.12.2",
+		"typescript": "5.8.3",
+		"unplugin-unused": "0.5.0",
+		"vitest": "3.2.3",
 		"ws": "^8.18.0"
 	},
 	"scripts": {
-		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
-		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs --packages=external",
-		"build:ts": "rm -r dist/esm ; tsc",
+		"build": "tsdown src/main.ts --clean --publint --unused --dts --format esm --format cjs",
 		"check": "bun run lint && bun run build && bun run test",
-		"lint": "eslint . && tsc --skipLibCheck --noemit",
-		"test": "docker build -t test/extws-server-uws . && docker run --rm test/extws-server-uws"
+		"lint": "eslint . && tsc",
+		"test": "vitest run --no-file-parallelism"
 	},
 	"repository": {
 		"type": "git",

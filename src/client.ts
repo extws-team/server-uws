@@ -1,5 +1,5 @@
 import { ExtWSClient } from '@extws/server';
-import { WebSocket } from 'uWebSockets.js';
+import type { WebSocket } from 'uWebSockets.js';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsServer } from './main.js';
 
@@ -30,7 +30,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		this.uws_client = uws_client;
 	}
 
-	addToChannel(channel_id: string) {
+	override addToChannel(channel_id: string): void {
 		try {
 			this.uws_client.subscribe(channel_id);
 		}
@@ -41,7 +41,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	removeFromChannel(channel_id: string) {
+	override removeFromChannel(channel_id: string): void {
 		try {
 			this.uws_client.unsubscribe(channel_id);
 		}
@@ -52,7 +52,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	sendPayload(payload: string) {
+	override sendPayload(payload: string): void {
 		try {
 			this.uws_client.send(payload);
 		}
@@ -63,7 +63,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	disconnect(is_disconnected: boolean = false) {
+	override disconnect(is_disconnected: boolean = false): void {
 		if (!is_disconnected) {
 			try {
 				this.uws_client.end();
