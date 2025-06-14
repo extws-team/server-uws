@@ -6,8 +6,7 @@ import { ExtWSUwsServer } from './main.js';
 export type WebSocketUserData = {
 	id: string,
 	url: URL,
-	// headers: Headers,
-	headers: Map<string, string>,
+	headers: Headers,
 };
 
 export class ExtWSUwsClient extends ExtWSClient {
@@ -27,7 +26,6 @@ export class ExtWSUwsClient extends ExtWSClient {
 				),
 			},
 		);
-		this.uws_client = uws_client;
 	}
 
 	override addToChannel(channel_id: string): void {

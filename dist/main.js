@@ -12,7 +12,6 @@ var ExtWSUwsClient = class extends ExtWSClient {
 			ip: new IP(uws_client.getRemoteAddress())
 		});
 		this.uws_client = uws_client;
-		this.uws_client = uws_client;
 	}
 	addToChannel(channel_id) {
 		try {
@@ -58,44 +57,49 @@ var ExtWSUwsServer = class extends ExtWS {
 			maxBackpressure,
 			maxLifetime: 0,
 			maxPayloadLength,
-			upgrade: (response, request, context) => {
-				const headers = new Map();
-				request.forEach((key, value) => {
-					headers.set(key, value);
-				});
-				const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
-				const ip = new IP(response.getRemoteAddress());
+			upgrade: async (response, request, context) => {
 				let is_aborted = false;
 				response.onAborted(() => {
 					is_aborted = true;
 				});
-				Promise.resolve().then(() => this.options?.onBeforeUpgrade?.({
-					url,
-					headers,
-					ip
-				})).then((upgrade_response) => {
+				try {
+					const headers = new Headers();
+					request.forEach((key, value) => {
+						headers.set(key, value);
+					});
+					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
+					const ip = new IP(response.getRemoteAddress());
+					const upgrade_response = await this.options?.onBeforeUpgrade?.({
+						url,
+						headers,
+						ip
+					});
 					if (is_aborted) return;
-					response.cork(() => {
-						if (upgrade_response) {
+					if (upgrade_response) {
+						const upgrade_response_body = await upgrade_response.arrayBuffer();
+						if (is_aborted) return;
+						response.cork(() => {
 							response.writeStatus(String(upgrade_response.status));
-							if (upgrade_response.headers) {
-								for (const [key, value] of Object.entries(upgrade_response.headers)) if (value !== void 0) response.writeHeader(key, value);
-							}
-							response.write(upgrade_response.body ?? "");
+							upgrade_response.headers.forEach((value, key) => {
+								response.writeHeader(key, value);
+							});
+							response.write(upgrade_response_body);
 							response.end();
-						} else response.upgrade({
+						});
+					} else response.cork(() => {
+						response.upgrade({
 							id: "",
 							url,
 							headers
 						}, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
 					});
-				}).catch((error) => {
+				} catch (error) {
 					console.error("Upgrade handler error:", error);
 					if (!is_aborted) response.cork(() => {
 						response.writeStatus("500");
 						response.end();
 					});
-				});
+				}
 			},
 			open: (uws_client) => {
 				const client = new ExtWSUwsClient(this, uws_client);

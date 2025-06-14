@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.2.1-dev",
+	"version": "0.3.0-dev",
 	"description": "ExtWS server based on uWebSockets.js",
 	"publishConfig": {
 		"access": "public"
@@ -19,10 +19,10 @@
 		}
 	},
 	"engines": {
-		"node": "~20 || ~22 || ~23 || ~24"
+		"node": "^22 || ^23 || ^24"
 	},
 	"dependencies": {
-		"@extws/server": "github:extws-team/server#36d07e1f69ef0360f703bc85619c47d8099d490e",
+		"@extws/server": "github:extws-team/server#d266a08a4cbf32270d2b0530f2a9504ec6c90bf6",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
 	},
 	"peerDependencies": {
@@ -44,7 +44,7 @@
 	"scripts": {
 		"build": "tsdown src/main.ts --clean --publint --unused --dts --format esm --format cjs",
 		"check": "bun run lint && bun run build && bun run test",
-		"lint": "eslint . && tsc",
+		"lint": "eslint . && tsc && (cd test && tsc)",
 		"test": "vitest run --no-file-parallelism"
 	},
 	"repository": {

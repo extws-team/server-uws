@@ -6,8 +6,7 @@ import { ExtWSOnBeforeUpgradeHandler } from "@extws/server/dev";
 type WebSocketUserData = {
   id: string;
   url: URL;
-  // headers: Headers,
-  headers: Map<string, string>;
+  headers: Headers;
 };
 declare class ExtWSUwsClient extends ExtWSClient {
   private uws_client;

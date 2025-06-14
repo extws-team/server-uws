@@ -61,82 +61,84 @@ export class ExtWSUwsServer extends ExtWS {
 				maxBackpressure,
 				maxLifetime: 0,
 				maxPayloadLength,
-				upgrade: (response, request, context) => {
-					// FIXME: use Headers
-					const headers = new Map<string, string>();
-					// eslint-disable-next-line unicorn/no-array-for-each
-					request.forEach((key, value) => {
-						headers.set(key, value);
-					});
-
-					const url = new URL(
-						`${request.getUrl()}?${request.getQuery()}`,
-						`ws://${headers.get('host')}`,
-					);
-
-					const ip = new IP(response.getRemoteAddress());
-
+				upgrade: async (response, request, context) => {
 					let is_aborted = false;
 					response.onAborted(() => {
 						is_aborted = true;
 					});
 
-					Promise.resolve()
-						.then(() => this.options?.onBeforeUpgrade?.({
+					try {
+						const headers = new Headers();
+						// eslint-disable-next-line unicorn/no-array-for-each
+						request.forEach((key, value) => {
+							headers.set(key, value);
+						});
+
+						const url = new URL(
+							`${request.getUrl()}?${request.getQuery()}`,
+							`ws://${headers.get('host')}`,
+						);
+
+						const ip = new IP(response.getRemoteAddress());
+
+						const upgrade_response = await this.options?.onBeforeUpgrade?.({
 							url,
 							headers,
 							ip,
-						}))
-						.then((upgrade_response) => {
-							// eslint-disable-next-line promise/always-return
+						});
+
+						if (is_aborted) {
+							return;
+						}
+
+						if (upgrade_response) {
+							const upgrade_response_body = await upgrade_response.arrayBuffer();
+
 							if (is_aborted) {
 								return;
 							}
 
 							response.cork(() => {
-								if (upgrade_response) {
-									response.writeStatus(
-										String(upgrade_response.status),
-									);
+								response.writeStatus(
+									String(upgrade_response.status),
+								);
 
-									if (upgrade_response.headers) {
-										for (const [ key, value ] of Object.entries(upgrade_response.headers)) {
-											if (value !== undefined) {
-												response.writeHeader(key, value);
-											}
-										}
-									}
-
-									response.write(upgrade_response.body ?? '');
-
-									response.end();
-								}
-								else {
-									response.upgrade<WebSocketUserData>(
-										{
-											id: '',
-											url,
-											headers,
-										},
-										headers.get('sec-websocket-key') ?? '',
-										headers.get('sec-websocket-protocol') ?? '',
-										headers.get('sec-websocket-extensions') ?? '',
-										context,
-									);
-								}
-							});
-						})
-						.catch((error) => {
-							// eslint-disable-next-line no-console
-							console.error('Upgrade handler error:', error);
-
-							if (!is_aborted) {
-								response.cork(() => {
-									response.writeStatus('500');
-									response.end();
+								// eslint-disable-next-line unicorn/no-array-for-each
+								upgrade_response.headers.forEach((value, key) => {
+									response.writeHeader(key, value);
 								});
-							}
-						});
+
+								response.write(upgrade_response_body);
+								response.end();
+							});
+						}
+						else {
+							response.cork(() => {
+								response.upgrade<WebSocketUserData>(
+									{
+										id: '',
+										url,
+										headers,
+									},
+									headers.get('sec-websocket-key') ?? '',
+									headers.get('sec-websocket-protocol') ?? '',
+									headers.get('sec-websocket-extensions') ?? '',
+									context,
+								);
+							});
+						}
+					}
+					catch (error) {
+						// eslint-disable-next-line no-console
+						console.error('Upgrade handler error:', error);
+
+						if (!is_aborted) {
+							response.cork(() => {
+								response.writeStatus('500');
+								response.end();
+							});
+						}
+					}
 				},
 				open: (uws_client) => {
 					const client = new ExtWSUwsClient(

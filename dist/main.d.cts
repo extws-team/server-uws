@@ -6,8 +6,7 @@ import { WebSocket } from "uWebSockets.js";
 type WebSocketUserData = {
   id: string;
   url: URL;
-  // headers: Headers,
-  headers: Map<string, string>;
+  headers: Headers;
 };
 declare class ExtWSUwsClient extends ExtWSClient {
   private uws_client;

@@ -99,6 +99,7 @@ describe('ExtWSUwsServer', () => {
 
 		expect(response.status).toBe(400);
 		expect(response.headers.get('x-test')).toBe('test');
+		await expect(response.text()).resolves.toBe('drop');
 	});
 
 	test('ping', async () => {
