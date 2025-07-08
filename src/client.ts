@@ -9,6 +9,17 @@ export type WebSocketUserData = {
 	headers: Headers,
 };
 
+/**
+ * Prints some errors to console.
+ * @param error Error to print.
+ */
+function printError(error: unknown) {
+	if (error instanceof Error && error.message !== 'Invalid access of closed uWS.WebSocket/SSLWebSocket.') {
+		// eslint-disable-next-line no-console
+		console.error(error);
+	}
+}
+
 export class ExtWSUwsClient extends ExtWSClient {
 	constructor(
 		server: ExtWSUwsServer,
@@ -33,8 +44,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 			this.uws_client.subscribe(channel_id);
 		}
 		catch (error) {
-			// eslint-disable-next-line no-console
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
@@ -44,8 +54,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 			this.uws_client.unsubscribe(channel_id);
 		}
 		catch (error) {
-			// eslint-disable-next-line no-console
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
@@ -55,8 +64,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 			this.uws_client.send(payload);
 		}
 		catch (error) {
-			// eslint-disable-next-line no-console
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
@@ -66,7 +74,9 @@ export class ExtWSUwsClient extends ExtWSClient {
 			try {
 				this.uws_client.end();
 			}
-			catch {}
+			catch (error) {
+				printError(error);
+			}
 		}
 
 		super.disconnect();

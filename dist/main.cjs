@@ -26,6 +26,13 @@ const uWebSockets_js = __toESM(require("uWebSockets.js"));
 const __kirick_ip = __toESM(require("@kirick/ip"));
 
 //#region src/client.ts
+/**
+* Prints some errors to console.
+* @param error Error to print.
+*/
+function printError(error) {
+	if (error instanceof Error && error.message !== "Invalid access of closed uWS.WebSocket/SSLWebSocket.") console.error(error);
+}
 var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 	constructor(server, uws_client) {
 		const user_data = uws_client.getUserData();
@@ -40,7 +47,7 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 		try {
 			this.uws_client.subscribe(channel_id);
 		} catch (error) {
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
@@ -48,7 +55,7 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 		try {
 			this.uws_client.unsubscribe(channel_id);
 		} catch (error) {
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
@@ -56,14 +63,16 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 		try {
 			this.uws_client.send(payload);
 		} catch (error) {
-			console.error(error);
+			printError(error);
 			this.disconnect();
 		}
 	}
 	disconnect(is_disconnected = false) {
 		if (!is_disconnected) try {
 			this.uws_client.end();
-		} catch {}
+		} catch (error) {
+			printError(error);
+		}
 		super.disconnect();
 	}
 };
