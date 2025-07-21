@@ -81,7 +81,8 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 //#region src/main.ts
 var ExtWSUwsServer = class extends __extws_server.ExtWS {
 	uws_server;
-	constructor({ port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest }) {
+	constructor(options) {
+		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
 		super(options_rest);
 		this.uws_server = (0, uWebSockets_js.App)().ws(path, {
 			compression: uWebSockets_js.SHARED_COMPRESSOR,

@@ -15,14 +15,7 @@ export class ExtWSUwsServer extends ExtWS {
 	private uws_server: TemplatedApp;
 
 	// eslint-disable-next-line max-lines-per-function
-	constructor({
-		port,
-		path = '/ws',
-		idleTimeout = 400_000,
-		maxBackpressure,
-		maxPayloadLength,
-		...options_rest
-	}: {
+	constructor(options: {
 		/** The port to listen on. */
 		port: number,
 		/** The path to listen on. */
@@ -50,6 +43,15 @@ export class ExtWSUwsServer extends ExtWS {
 		/** Hook that is called before a WebSocket upgrade. Useful to parse authorization and reject upgrade with custom headers such as `Set-Cookie`. */
 		onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler,
 	}) {
+		const {
+			port,
+			path = '/ws',
+			idleTimeout = 400_000,
+			maxBackpressure,
+			maxPayloadLength,
+			...options_rest
+		} = options;
+
 		super(options_rest);
 
 		// eslint-disable-next-line new-cap

@@ -21,14 +21,7 @@ declare class ExtWSUwsClient extends ExtWSClient {
 declare class ExtWSUwsServer extends ExtWS {
   private uws_server;
   // eslint-disable-next-line max-lines-per-function
-  constructor({
-    port,
-    path,
-    idleTimeout,
-    maxBackpressure,
-    maxPayloadLength,
-    ...options_rest
-  }: {
+  constructor(options: {
     /** The port to listen on. */
     port: number;
     /** The path to listen on. */
