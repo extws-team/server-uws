@@ -1,9 +1,7 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
-import {
-	ExtWSEvent,
-	type ExtWSClient,
-} from '@extws/server';
+import { type ExtWSClient } from '@extws/server';
+import * as v from 'valibot';
 import { ExtWSUwsServer } from '../src/main.js';
 
 export const extwsServer = new ExtWSUwsServer({
@@ -26,11 +24,18 @@ export const extwsServer = new ExtWSUwsServer({
 
 extwsServer.on(
 	'hello',
-	(event: ExtWSEvent<{ name: string }>) => {
+	(event) => {
+		const data = v.parse(
+			v.object({
+				name: v.string(),
+			}),
+			event.detail,
+		);
+
 		event.client.send(
 			'hello',
 			{
-				text: `Hello, ${event.detail.name}!`,
+				text: `Hello, ${data.name}!`,
 			},
 		);
 	},
