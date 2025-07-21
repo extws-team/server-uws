@@ -4,7 +4,7 @@
     "": {
       "name": "@extws/server-uws",
       "dependencies": {
-        "@extws/server": "github:extws-team/server#25417a7482240d9fc3e4d69c6a9ff9e2392604be",
+        "@extws/server": "github:extws-team/server#9e2605572ef08c68ad3b528b18a345d0dd761ad9",
         "uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3",
       },
       "devDependencies": {
@@ -113,7 +113,7 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.1.0", "", { "dependencies": { "levn": "^0.4.1" } }, "sha512-autAXT203ixhqei9xt+qkYOvY8l6LAFIdT2UXc/RPNeUVfqRF1BV94GTJyVPFKT8nFM6MyVJhjLj9E8JWvf5zQ=="],
 
-    "@extws/server": ["@extws/server@github:extws-team/server#25417a7", { "dependencies": { "nanoid": "3.3.8", "neoevents": "github:kirick-ts/neoevents#b30e13bb365e1d81ab5e8c54ac16edb039755d4c" }, "peerDependencies": { "@kirick/ip": "^0.1.1" } }, "extws-team-server-25417a7"],
+    "@extws/server": ["@extws/server@github:extws-team/server#9e26055", { "dependencies": { "nanoid": "3.3.8", "neoevents": "0.3.0" }, "peerDependencies": { "@kirick/ip": "^0.1.1" } }, "extws-team-server-9e26055"],
 
     "@humanwhocodes/module-importer": ["@humanwhocodes/module-importer@1.0.1", "", {}, "sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA=="],
 
@@ -521,7 +521,7 @@
 
     "natural-compare": ["natural-compare@1.4.0", "", {}, "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw=="],
 
-    "neoevents": ["neoevents@github:kirick-ts/neoevents#b30e13b", {}, "kirick-ts-neoevents-b30e13b"],
+    "neoevents": ["neoevents@0.3.0", "", {}, "sha512-et9vcJ8ElRUbgxeJXAw++1noXVY302fxRvwEoIDll9KiQAeySjTQBdLtATvtE17MgbitLjjixI5UcFOS92EI+w=="],
 
     "node-domexception": ["node-domexception@1.0.0", "", {}, "sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ=="],
 
