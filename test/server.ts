@@ -22,24 +22,18 @@ export const extwsServer = new ExtWSUwsServer({
 	},
 });
 
-extwsServer.on(
-	'hello',
-	(event) => {
-		const data = v.parse(
-			v.object({
-				name: v.string(),
-			}),
-			event.detail,
-		);
+extwsServer.on('hello', (event) => {
+	const data = v.parse(
+		v.object({
+			name: v.string(),
+		}),
+		event.detail,
+	);
 
-		event.client.send(
-			'hello',
-			{
-				text: `Hello, ${data.name}!`,
-			},
-		);
-	},
-);
+	event.client.send('hello', {
+		text: `Hello, ${data.name}!`,
+	});
+});
 
 export function testBroadcast() {
 	extwsServer.broadcast({
@@ -56,19 +50,13 @@ export function testGroupLeave(extwsClient: ExtWSClient, name: string) {
 }
 
 export function testSendToGroup(group_name: string) {
-	extwsServer.sendToGroup(
-		group_name,
-		{
-			foo: 'bar',
-		},
-	);
+	extwsServer.sendToGroup(group_name, {
+		foo: 'bar',
+	});
 }
 
 export function testSendToSocket(client_id: string) {
-	extwsServer.sendToSocket(
-		client_id,
-		{
-			foo: 'bar',
-		},
-	);
+	extwsServer.sendToSocket(client_id, {
+		foo: 'bar',
+	});
 }

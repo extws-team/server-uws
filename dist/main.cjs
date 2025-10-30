@@ -21,9 +21,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 }) : target, mod));
 
 //#endregion
-const __extws_server = __toESM(require("@extws/server"));
-const uWebSockets_js = __toESM(require("uWebSockets.js"));
-const __kirick_ip = __toESM(require("@kirick/ip"));
+let uWebSockets_js = require("uWebSockets.js");
+uWebSockets_js = __toESM(uWebSockets_js);
+let __extws_server = require("@extws/server");
+__extws_server = __toESM(__extws_server);
+let __kirick_ip = require("@kirick/ip");
+__kirick_ip = __toESM(__kirick_ip);
 
 //#region src/client.ts
 /**
@@ -83,14 +86,14 @@ var ExtWSUwsServer = class extends __extws_server.ExtWS {
 	uws_server;
 	constructor(options) {
 		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
-		super(options_rest);
+		super();
 		this.uws_server = (0, uWebSockets_js.App)().ws(path, {
 			compression: uWebSockets_js.SHARED_COMPRESSOR,
 			idleTimeout: Math.floor(idleTimeout / 1e3),
 			maxBackpressure,
 			maxLifetime: 0,
 			maxPayloadLength,
-			upgrade: async (response, request, context) => {
+			async upgrade(response, request, context) {
 				let is_aborted = false;
 				response.onAborted(() => {
 					is_aborted = true;
@@ -102,7 +105,7 @@ var ExtWSUwsServer = class extends __extws_server.ExtWS {
 					});
 					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
 					const ip = new __kirick_ip.IP(response.getRemoteAddress());
-					const upgrade_response = await this.options?.onBeforeUpgrade?.({
+					const upgrade_response = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
 						ip

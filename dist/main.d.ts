@@ -1,5 +1,5 @@
-import { ExtWS, ExtWSClient } from "@extws/server";
 import { WebSocket } from "uWebSockets.js";
+import { ExtWS, ExtWSClient } from "@extws/server";
 import { ExtWSOnBeforeUpgradeHandler } from "@extws/server/dev";
 
 //#region src/client.d.ts
@@ -20,7 +20,6 @@ declare class ExtWSUwsClient extends ExtWSClient {
 //#region src/main.d.ts
 declare class ExtWSUwsServer extends ExtWS {
   private uws_server;
-  // eslint-disable-next-line max-lines-per-function
   constructor(options: {
     /** The port to listen on. */
     port: number;

@@ -1,5 +1,5 @@
-import { ExtWS, ExtWSClient } from "@extws/server";
 import { App, SHARED_COMPRESSOR } from "uWebSockets.js";
+import { ExtWS, ExtWSClient } from "@extws/server";
 import { IP } from "@kirick/ip";
 
 //#region src/client.ts
@@ -60,14 +60,14 @@ var ExtWSUwsServer = class extends ExtWS {
 	uws_server;
 	constructor(options) {
 		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
-		super(options_rest);
+		super();
 		this.uws_server = App().ws(path, {
 			compression: SHARED_COMPRESSOR,
 			idleTimeout: Math.floor(idleTimeout / 1e3),
 			maxBackpressure,
 			maxLifetime: 0,
 			maxPayloadLength,
-			upgrade: async (response, request, context) => {
+			async upgrade(response, request, context) {
 				let is_aborted = false;
 				response.onAborted(() => {
 					is_aborted = true;
@@ -79,7 +79,7 @@ var ExtWSUwsServer = class extends ExtWS {
 					});
 					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
 					const ip = new IP(response.getRemoteAddress());
-					const upgrade_response = await this.options?.onBeforeUpgrade?.({
+					const upgrade_response = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
 						ip

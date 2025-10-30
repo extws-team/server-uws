@@ -1,11 +1,8 @@
+// oxlint-disable max-nested-callbacks
+
 import { type ExtWSClient } from '@extws/server';
 import fetch from 'node-fetch';
-import {
-	describe,
-	test,
-	expect,
-	afterAll,
-} from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { WebSocket } from 'ws';
 import {
 	extwsServer,
@@ -26,26 +23,21 @@ const ERROR_TIMEOUT = 'Timeout: No message received within the specified time';
  */
 function waitMessage(target: WebSocket): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
-		const timeout = setTimeout(
-			() => {
-				reject(new Error(ERROR_TIMEOUT));
-			},
-			100,
-		);
+		const timeout = setTimeout(() => {
+			reject(new Error(ERROR_TIMEOUT));
+		}, 100);
 
-		target.once(
-			'message',
-			(data) => {
-				const message = data instanceof ArrayBuffer
+		target.once('message', (data) => {
+			const message =
+				data instanceof ArrayBuffer
 					? Buffer.from(data).toString()
-					: (Array.isArray(data)
+					: Array.isArray(data)
 						? Buffer.concat(data).toString()
-						: data.toString());
+						: data.toString();
 
-				clearTimeout(timeout);
-				resolve(message);
-			},
-		);
+			clearTimeout(timeout);
+			resolve(message);
+		});
 	});
 }
 
@@ -54,16 +46,13 @@ function waitMessage(target: WebSocket): Promise<string> {
  * @returns -
  */
 async function createClient(): Promise<{
-	websocket: WebSocket,
-	extwsClient: ExtWSClient,
+	websocket: WebSocket;
+	extwsClient: ExtWSClient;
 }> {
 	const websocket = new WebSocket(WEBSOCKET_URL);
 	const init_message_promise = waitMessage(websocket);
 	await new Promise((resolve) => {
-		websocket.once(
-			'open',
-			resolve,
-		);
+		websocket.once('open', resolve);
 	});
 
 	const init_message = await init_message_promise;
@@ -89,8 +78,8 @@ describe('ExtWSUwsServer', () => {
 			`${WEBSOCKET_URL.replace('ws://', 'http://')}?drop=1`,
 			{
 				headers: {
-					'Connection': 'Upgrade',
-					'Upgrade': 'websocket',
+					Connection: 'Upgrade',
+					Upgrade: 'websocket',
 					'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
 					'Sec-WebSocket-Version': '13',
 				},
@@ -107,9 +96,7 @@ describe('ExtWSUwsServer', () => {
 
 		client.websocket.send('2');
 
-		expect(
-			await promise,
-		).toBe('3');
+		expect(await promise).toBe('3');
 	});
 
 	test('message', async () => {
@@ -117,9 +104,7 @@ describe('ExtWSUwsServer', () => {
 
 		client.websocket.send('4hello{"name":"world"}');
 
-		expect(
-			await promise,
-		).toBe('4hello{"text":"Hello, world!"}');
+		expect(await promise).toBe('4hello{"text":"Hello, world!"}');
 	});
 });
 
@@ -129,9 +114,7 @@ describe('broadcast', () => {
 
 		testBroadcast();
 
-		expect(
-			await promise,
-		).toBe('4{"foo":"bar"}');
+		expect(await promise).toBe('4{"foo":"bar"}');
 	});
 });
 
@@ -150,9 +133,7 @@ describe('groups', () => {
 		testGroupJoin(client.extwsClient, 'group');
 		testSendToGroup('group');
 
-		expect(
-			await promise,
-		).toBe('4{"foo":"bar"}');
+		expect(await promise).toBe('4{"foo":"bar"}');
 	});
 
 	test('joined to another group', async () => {
@@ -180,9 +161,7 @@ describe('send to socket', () => {
 
 		testSendToSocket(client.extwsClient.id);
 
-		expect(
-			await promise,
-		).toBe('4{"foo":"bar"}');
+		expect(await promise).toBe('4{"foo":"bar"}');
 	});
 
 	test('to non-existing client', async () => {
@@ -197,12 +176,9 @@ describe('send to socket', () => {
 describe('disconnect', () => {
 	test('by server', async () => {
 		const promise = new Promise<boolean>((resolve) => {
-			client.websocket.once(
-				'close',
-				(_) => {
-					resolve(true);
-				},
-			);
+			client.websocket.once('close', (_) => {
+				resolve(true);
+			});
 		});
 
 		client.extwsClient.disconnect();
@@ -220,10 +196,7 @@ describe('disconnect', () => {
 		client2.websocket.close();
 
 		await new Promise((resolve) => {
-			setTimeout(
-				resolve,
-				100,
-			);
+			setTimeout(resolve, 100);
 		});
 
 		expect(extwsServer.clients.size).toBe(0);
