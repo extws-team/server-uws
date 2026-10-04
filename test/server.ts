@@ -1,10 +1,10 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
-import { type ExtWSClient } from '@extws/server';
+import type { ExtWSClient } from '@extws/server';
 import * as v from 'valibot';
 import { ExtWSUwsServer } from '../src/main.js';
 
-export const extwsServer = new ExtWSUwsServer({
+export const extwsServer: ExtWSUwsServer = new ExtWSUwsServer({
 	port: 8080,
 	async onBeforeUpgrade({ url }) {
 		await new Promise((resolve) => {
@@ -35,27 +35,27 @@ extwsServer.on('hello', (event) => {
 	});
 });
 
-export function testBroadcast() {
+export function testBroadcast(): void {
 	extwsServer.broadcast({
 		foo: 'bar',
 	});
 }
 
-export function testGroupJoin(extwsClient: ExtWSClient, name: string) {
+export function testGroupJoin(extwsClient: ExtWSClient, name: string): void {
 	extwsClient.join(name);
 }
 
-export function testGroupLeave(extwsClient: ExtWSClient, name: string) {
+export function testGroupLeave(extwsClient: ExtWSClient, name: string): void {
 	extwsClient.leave(name);
 }
 
-export function testSendToGroup(group_name: string) {
+export function testSendToGroup(group_name: string): void {
 	extwsServer.sendToGroup(group_name, {
 		foo: 'bar',
 	});
 }
 
-export function testSendToSocket(client_id: string) {
+export function testSendToSocket(client_id: string): void {
 	extwsServer.sendToSocket(client_id, {
 		foo: 'bar',
 	});

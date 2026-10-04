@@ -1,7 +1,6 @@
 import { App, SHARED_COMPRESSOR } from "uWebSockets.js";
 import { ExtWS, ExtWSClient } from "@extws/server";
 import { IP } from "@kirick/ip";
-
 //#region src/client.ts
 /**
 * Prints some errors to console.
@@ -11,16 +10,19 @@ function printError(error) {
 	if (error instanceof Error && error.message !== "Invalid access of closed uWS.WebSocket/SSLWebSocket.") console.error(error);
 }
 var ExtWSUwsClient = class extends ExtWSClient {
+	uws_client;
 	constructor(server, uws_client) {
 		const user_data = uws_client.getUserData();
 		super(server, {
 			url: user_data.url,
 			headers: user_data.headers,
-			ip: new IP(uws_client.getRemoteAddress())
+			ip: user_data.ip,
+			data: user_data.data
 		});
 		this.uws_client = uws_client;
 	}
-	addToChannel(channel_id) {
+	/** @internal */
+	_addToChannel(channel_id) {
 		try {
 			this.uws_client.subscribe(channel_id);
 		} catch (error) {
@@ -28,7 +30,8 @@ var ExtWSUwsClient = class extends ExtWSClient {
 			this.disconnect();
 		}
 	}
-	removeFromChannel(channel_id) {
+	/** @internal */
+	_removeFromChannel(channel_id) {
 		try {
 			this.uws_client.unsubscribe(channel_id);
 		} catch (error) {
@@ -36,7 +39,8 @@ var ExtWSUwsClient = class extends ExtWSClient {
 			this.disconnect();
 		}
 	}
-	sendPayload(payload) {
+	/** @internal */
+	_sendPayload(payload) {
 		try {
 			this.uws_client.send(payload);
 		} catch (error) {
@@ -53,22 +57,22 @@ var ExtWSUwsClient = class extends ExtWSClient {
 		super.disconnect();
 	}
 };
-
 //#endregion
 //#region src/main.ts
 var ExtWSUwsServer = class extends ExtWS {
 	uws_server;
 	constructor(options) {
-		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
-		super();
+		const { port, path = "/ws", idleTimeout, maxBackpressure, maxPayloadLength, ...options_rest } = options;
+		super({ idle_timeout: idleTimeout });
 		this.uws_server = App().ws(path, {
 			compression: SHARED_COMPRESSOR,
-			idleTimeout: Math.floor(idleTimeout / 1e3),
+			idleTimeout: 400,
 			maxBackpressure,
 			maxLifetime: 0,
 			maxPayloadLength,
 			async upgrade(response, request, context) {
 				let is_aborted = false;
+				let is_response_finished = false;
 				response.onAborted(() => {
 					is_aborted = true;
 				});
@@ -79,34 +83,48 @@ var ExtWSUwsServer = class extends ExtWS {
 					});
 					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
 					const ip = new IP(response.getRemoteAddress());
+					const websocket_key = headers.get("sec-websocket-key") ?? "";
+					const websocket_protocol = headers.get("sec-websocket-protocol") ?? "";
+					const websocket_extensions = headers.get("sec-websocket-extensions") ?? "";
 					const upgrade_response = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
 						ip
 					});
 					if (is_aborted) return;
-					if (upgrade_response) {
+					if (upgrade_response instanceof Response) {
 						const upgrade_response_body = await upgrade_response.arrayBuffer();
 						if (is_aborted) return;
 						response.cork(() => {
 							response.writeStatus(String(upgrade_response.status));
-							upgrade_response.headers.forEach((value, key) => {
+							for (const [key, value] of upgrade_response.headers.entries()) {
+								const name = key.toLowerCase();
+								if ([
+									"set-cookie",
+									"content-length",
+									"transfer-encoding"
+								].includes(name)) continue;
 								response.writeHeader(key, value);
-							});
-							response.write(upgrade_response_body);
-							response.end();
+							}
+							for (const cookie of upgrade_response.headers.getSetCookie()) response.writeHeader("set-cookie", cookie);
+							is_response_finished = true;
+							response.end(upgrade_response_body);
 						});
 					} else response.cork(() => {
+						is_response_finished = true;
 						response.upgrade({
 							id: "",
 							url,
-							headers
-						}, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
+							headers,
+							ip,
+							data: upgrade_response?.data
+						}, websocket_key, websocket_protocol, websocket_extensions, context);
 					});
 				} catch (error) {
 					console.error("Upgrade handler error:", error);
-					if (!is_aborted) response.cork(() => {
+					if (!is_aborted && !is_response_finished) response.cork(() => {
 						response.writeStatus("500");
+						is_response_finished = true;
 						response.end();
 					});
 				}
@@ -140,10 +158,10 @@ var ExtWSUwsServer = class extends ExtWS {
 		this.uws_server.publish(channel, payload);
 	}
 	close() {
+		this.stopClientsWatch();
 		this.uws_server.close();
 		return Promise.resolve();
 	}
 };
-
 //#endregion
 export { ExtWSUwsClient, ExtWSUwsServer };

@@ -1,9 +1,11 @@
+/* eslint-disable jsdoc/require-jsdoc */
 // oxlint-disable max-nested-callbacks
 
-import { type ExtWSClient } from '@extws/server';
+import { once } from 'node:events';
+import type { ExtWSClient } from '@extws/server';
 import fetch from 'node-fetch';
-import { afterAll, describe, expect, test } from 'vitest';
-import { WebSocket } from 'ws';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { type RawData, WebSocket } from 'ws';
 import {
 	extwsServer,
 	testBroadcast,
@@ -14,20 +16,43 @@ import {
 } from '../test/server.js';
 
 const WEBSOCKET_URL = 'ws://localhost:8080/ws';
+const MESSAGE_TIMEOUT_MS = 2000;
+const NO_MESSAGE_TIMEOUT_MS = 100;
+
 const ERROR_TIMEOUT = 'Timeout: No message received within the specified time';
 
 /**
  * Wait for a message from the target WebSocket with a timeout.
  * @param target - The target WebSocket.
- * @returns - A promise that resolves with the message or rejects on timeout.
+ * @param timeout_ms - Maximum waiting time in milliseconds.
+ * @returns - The received message.
  */
-function waitMessage(target: WebSocket): Promise<string> {
-	return new Promise<string>((resolve, reject) => {
-		const timeout = setTimeout(() => {
-			reject(new Error(ERROR_TIMEOUT));
-		}, 100);
+function waitMessage(
+	target: WebSocket,
+	timeout_ms = MESSAGE_TIMEOUT_MS,
+): Promise<string> {
+	if (
+		target.readyState === WebSocket.CLOSING
+		|| target.readyState === WebSocket.CLOSED
+	) {
+		return Promise.reject(
+			new Error('Cannot wait for a message on a closing or closed WebSocket'),
+		);
+	}
 
-		target.once('message', (data) => {
+	return new Promise<string>((resolve, reject) => {
+		const timeout = setTimeout(onTimeout, timeout_ms);
+
+		function cleanup(): void {
+			clearTimeout(timeout);
+			target.off('message', onMessage);
+			target.off('error', onError);
+			target.off('close', onClose);
+		}
+
+		function onMessage(data: RawData): void {
+			cleanup();
+
 			const message =
 				data instanceof ArrayBuffer
 					? Buffer.from(data).toString()
@@ -35,38 +60,80 @@ function waitMessage(target: WebSocket): Promise<string> {
 						? Buffer.concat(data).toString()
 						: data.toString();
 
-			clearTimeout(timeout);
 			resolve(message);
-		});
+		}
+
+		function onError(error: Error): void {
+			cleanup();
+			reject(error);
+		}
+
+		function onClose(code: number): void {
+			cleanup();
+			reject(
+				new Error(
+					`WebSocket closed before a message was received (code: ${code})`,
+				),
+			);
+		}
+
+		function onTimeout(): void {
+			cleanup();
+			reject(new Error(ERROR_TIMEOUT));
+		}
+
+		target.once('message', onMessage);
+		target.once('error', onError);
+		target.once('close', onClose);
 	});
 }
 
 /**
  * Create a WebSocket client and get the corresponding ExtWSClient.
- * @returns -
+ * @returns - The WebSocket and its corresponding server-side client.
  */
 async function createClient(): Promise<{
 	websocket: WebSocket;
 	extwsClient: ExtWSClient;
 }> {
 	const websocket = new WebSocket(WEBSOCKET_URL);
-	const init_message_promise = waitMessage(websocket);
-	await new Promise((resolve) => {
-		websocket.once('open', resolve);
-	});
 
-	const init_message = await init_message_promise;
-	const client_id = JSON.parse(init_message.slice(1)).id;
+	try {
+		const init_message = await waitMessage(websocket);
+		const client_id = JSON.parse(init_message.slice(1)).id;
+		const extwsClient = extwsServer.clients.get(client_id);
 
-	const extwsClient = extwsServer.clients.get(client_id)!;
+		if (!extwsClient) {
+			throw new Error(`Server-side client was not found for id: ${client_id}`);
+		}
 
-	return {
-		websocket,
-		extwsClient,
-	};
+		return {
+			websocket,
+			extwsClient,
+		};
+	} catch (error) {
+		if (
+			websocket.readyState === WebSocket.CONNECTING
+			|| websocket.readyState === WebSocket.OPEN
+		) {
+			if (websocket.readyState === WebSocket.CONNECTING) {
+				websocket.once('error', () => {
+					/* empty */
+				});
+			}
+
+			websocket.terminate();
+		}
+
+		throw error;
+	}
 }
 
-const client = await createClient();
+let client: Awaited<ReturnType<typeof createClient>>;
+
+beforeAll(async () => {
+	client = await createClient();
+});
 
 afterAll(() => {
 	extwsServer.close();
@@ -120,7 +187,7 @@ describe('broadcast', () => {
 
 describe('groups', () => {
 	test('before join any', async () => {
-		const promise = waitMessage(client.websocket);
+		const promise = waitMessage(client.websocket, NO_MESSAGE_TIMEOUT_MS);
 
 		testSendToGroup('group');
 
@@ -137,7 +204,7 @@ describe('groups', () => {
 	});
 
 	test('joined to another group', async () => {
-		const promise = waitMessage(client.websocket);
+		const promise = waitMessage(client.websocket, NO_MESSAGE_TIMEOUT_MS);
 
 		testGroupJoin(client.extwsClient, 'group');
 		testSendToGroup('group_another');
@@ -146,7 +213,7 @@ describe('groups', () => {
 	});
 
 	test('left', async () => {
-		const promise = waitMessage(client.websocket);
+		const promise = waitMessage(client.websocket, NO_MESSAGE_TIMEOUT_MS);
 
 		testGroupLeave(client.extwsClient, 'group');
 		testSendToGroup('group');
@@ -165,7 +232,7 @@ describe('send to socket', () => {
 	});
 
 	test('to non-existing client', async () => {
-		const promise = waitMessage(client.websocket);
+		const promise = waitMessage(client.websocket, NO_MESSAGE_TIMEOUT_MS);
 
 		testSendToSocket('777');
 
@@ -175,15 +242,17 @@ describe('send to socket', () => {
 
 describe('disconnect', () => {
 	test('by server', async () => {
-		const promise = new Promise<boolean>((resolve) => {
-			client.websocket.once('close', (_) => {
-				resolve(true);
-			});
+		const close_promise = once(client.websocket, 'close', {
+			signal: AbortSignal.timeout(MESSAGE_TIMEOUT_MS),
 		});
 
 		client.extwsClient.disconnect();
 
-		expect(await promise).toBe(true);
+		await close_promise;
+
+		await expect
+			.poll(() => extwsServer.clients.size, { timeout: MESSAGE_TIMEOUT_MS })
+			.toBe(0);
 	});
 
 	test('by client', async () => {
@@ -193,12 +262,16 @@ describe('disconnect', () => {
 
 		expect(extwsServer.clients.size).toBe(1);
 
-		client2.websocket.close();
-
-		await new Promise((resolve) => {
-			setTimeout(resolve, 100);
+		const close_promise = once(client2.websocket, 'close', {
+			signal: AbortSignal.timeout(MESSAGE_TIMEOUT_MS),
 		});
 
-		expect(extwsServer.clients.size).toBe(0);
+		client2.websocket.close();
+
+		await close_promise;
+
+		await expect
+			.poll(() => extwsServer.clients.size, { timeout: MESSAGE_TIMEOUT_MS })
+			.toBe(0);
 	});
 });

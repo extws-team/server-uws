@@ -1,13 +1,16 @@
 import type { WebSocket } from 'uWebSockets.js';
 import { ExtWSClient } from '@extws/server';
-import { IP } from '@kirick/ip';
+import type { IP } from '@kirick/ip';
 import { ExtWSUwsServer } from './main.js';
 
-export type WebSocketUserData = {
+export type WebSocketUserData<ClientData = undefined> = {
 	id: string;
 	url: URL;
 	headers: Headers;
-};
+	ip: IP;
+} & ([ClientData] extends [undefined]
+	? { data?: undefined }
+	: { data: ClientData });
 
 /**
  * Prints some errors to console.
@@ -23,21 +26,25 @@ function printError(error: unknown) {
 	}
 }
 
-export class ExtWSUwsClient extends ExtWSClient {
+export class ExtWSUwsClient<
+	ClientData = undefined,
+> extends ExtWSClient<ClientData> {
 	constructor(
-		server: ExtWSUwsServer,
-		private uws_client: WebSocket<WebSocketUserData>,
+		server: ExtWSUwsServer<ClientData>,
+		private uws_client: WebSocket<WebSocketUserData<ClientData>>,
 	) {
 		const user_data = uws_client.getUserData();
 
 		super(server, {
 			url: user_data.url,
 			headers: user_data.headers,
-			ip: new IP(uws_client.getRemoteAddress()),
-		});
+			ip: user_data.ip,
+			data: user_data.data,
+		} as ConstructorParameters<typeof ExtWSClient<ClientData>>[1]);
 	}
 
-	override addToChannel(channel_id: string): void {
+	/** @internal */
+	override _addToChannel(channel_id: string): void {
 		try {
 			this.uws_client.subscribe(channel_id);
 		} catch (error) {
@@ -46,7 +53,8 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override removeFromChannel(channel_id: string): void {
+	/** @internal */
+	override _removeFromChannel(channel_id: string): void {
 		try {
 			this.uws_client.unsubscribe(channel_id);
 		} catch (error) {
@@ -55,7 +63,8 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override sendPayload(payload: string): void {
+	/** @internal */
+	override _sendPayload(payload: string): void {
 		try {
 			this.uws_client.send(payload);
 		} catch (error) {
@@ -64,7 +73,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override disconnect(is_disconnected: boolean = false): void {
+	override disconnect(is_disconnected = false): void {
 		if (!is_disconnected) {
 			try {
 				this.uws_client.end();
