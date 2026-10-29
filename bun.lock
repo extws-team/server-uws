@@ -5,7 +5,7 @@
     "": {
       "name": "@extws/server-uws",
       "dependencies": {
-        "@extws/server": "github:extws-team/server#48f82f8e050b6d034de84ae579a3308cb47bacb3",
+        "@extws/server": "github:extws-team/server#6edcb183e59273e58d8c495c2902e8c9eb676331",
         "uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3",
       },
       "devDependencies": {
@@ -120,7 +120,7 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.7.3", "", { "dependencies": { "@eslint/core": "^1.2.1", "levn": "^0.4.1" } }, "sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q=="],
 
-    "@extws/server": ["@extws/server@github:extws-team/server#48f82f8", { "dependencies": { "nanoid": "6.0.2", "neoevents": "0.3.1" }, "peerDependencies": { "@kirick/ip": "^0.2.1" } }, "extws-team-server-48f82f8", "sha512-OZZoIUIjpSqdePgOIxUvgpQpfZ15pImh51Qrp655xhVZ/nf9WPO2EjSTTMBIzBPT3UaNqUvD237XSSJgnTeOLg=="],
+    "@extws/server": ["@extws/server@github:extws-team/server#6edcb18", { "dependencies": { "nanoid": "6.0.2", "neoevents": "0.3.1" }, "peerDependencies": { "@kirick/ip": "^0.2.1" } }, "extws-team-server-6edcb18", "sha512-eTX8XHAeiyp2LLLnIz9hVrMQ1cwoCHaLqrE7KC3hJQ48NARkKfrzkOrQz+mVY/BskihHDoYeqMBW7Y+0wnv1vg=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
@@ -644,7 +644,7 @@
 
     "typescript-eslint": ["typescript-eslint@8.64.0", "", { "dependencies": { "@typescript-eslint/eslint-plugin": "8.64.0", "@typescript-eslint/parser": "8.64.0", "@typescript-eslint/typescript-estree": "8.64.0", "@typescript-eslint/utils": "8.64.0" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0", "typescript": ">=4.8.4 <6.1.0" } }, "sha512-0qg+pDNMnqYzqH9AnNK+39tejHvsShUOUUoRUgtnTGE7QuMZhiFDnozq8nHJVq+Wae6NMLKNWLg5WmkcC/ndyQ=="],
 
-    "uWebSockets.js": ["uWebSockets.js@github:uNetworking/uWebSockets.js#cfc9a40", {}, "uNetworking-uWebSockets.js-cfc9a40"],
+    "uWebSockets.js": ["uWebSockets.js@github:uNetworking/uWebSockets.js#cfc9a40", {}, "uNetworking-uWebSockets.js-cfc9a40", "sha512-hZlZ8pdzosvByZsscSXMVTYw5UehiU9NPY34yVXa0laylA+190WAZ1rKzAqxak17iGe0DO/F9LXBDH2FppPX9A=="],
 
     "unconfig-core": ["unconfig-core@7.5.0", "", { "dependencies": { "@quansync/fs": "^1.0.0", "quansync": "^1.0.0" } }, "sha512-Su3FauozOGP44ZmKdHy2oE6LPjk51M/TRRjHv2HNCWiDvfvCoxC2lno6jevMA91MYAdCdwP05QnWdWpSbncX/w=="],
 

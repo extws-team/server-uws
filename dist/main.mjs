@@ -61,14 +61,18 @@ var ExtWSUwsClient = class extends ExtWSClient {
 var ExtWSUwsServer = class extends ExtWS {
 	uws_server;
 	constructor(options) {
-		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength, ...options_rest } = options;
-		super();
+		const { port, path = "/ws", uws, idleTimeout, pingTimeout, ...options_rest } = options;
+		super({
+			idleTimeout,
+			pingTimeout
+		});
 		this.uws_server = App().ws(path, {
-			compression: SHARED_COMPRESSOR,
-			idleTimeout: Math.floor(idleTimeout / 1e3),
-			maxBackpressure,
+			closeOnBackpressureLimit: uws?.closeOnBackpressureLimit,
+			compression: uws?.compression ?? SHARED_COMPRESSOR,
+			idleTimeout: 0,
+			maxBackpressure: uws?.maxBackpressure,
 			maxLifetime: 0,
-			maxPayloadLength,
+			maxPayloadLength: uws?.maxPayloadLength,
 			async upgrade(response, request, context) {
 				let is_aborted = false;
 				response.onAborted(() => {
@@ -137,15 +141,17 @@ var ExtWSUwsServer = class extends ExtWS {
 				}
 			}
 		});
-		this.uws_server.listen(port, () => {});
+		this.uws_server.listen(port, (listen_socket) => {
+			if (listen_socket === false) throw new Error(`Cannot listen on port ${port}.`);
+		});
 	}
 	/** @internal */
 	publish(channel, payload) {
 		this.uws_server.publish(channel, payload);
 	}
-	close() {
+	async close() {
 		this.uws_server.close();
-		return Promise.resolve();
+		await super.close();
 	}
 };
 export { ExtWSUwsClient, ExtWSUwsServer };

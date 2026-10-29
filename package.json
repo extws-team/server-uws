@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server-uws",
-	"version": "0.3.0-dev",
+	"version": "0.4.0-dev",
 	"description": "ExtWS server based on uWebSockets.js",
 	"publishConfig": {
 		"access": "public"
@@ -23,7 +23,7 @@
 		"node": "^22 || ^23 || ^24"
 	},
 	"dependencies": {
-		"@extws/server": "github:extws-team/server#48f82f8e050b6d034de84ae579a3308cb47bacb3",
+		"@extws/server": "github:extws-team/server#6edcb183e59273e58d8c495c2902e8c9eb676331",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
 	},
 	"peerDependencies": {
@@ -57,7 +57,16 @@
 		"type": "git",
 		"url": "git+https://github.com/extws-team/server-uws.git"
 	},
-	"keywords": [],
+	"keywords": [
+		"extws",
+		"websocket",
+		"websocket-server",
+		"uwebsockets",
+		"uws",
+		"realtime",
+		"pubsub",
+		"events"
+	],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",
 	"license": "MIT",
 	"bugs": {

@@ -1,6 +1,6 @@
+import { WebSocket, WebSocketBehavior } from "uWebSockets.js";
 import { ExtWS, ExtWSClient } from "@extws/server";
-import { ExtWSOnBeforeUpgradeOptions } from "@extws/server/dev";
-import { WebSocket } from "uWebSockets.js";
+import { ExtWSOnBeforeUpgradeOptions, ExtWSOptions } from "@extws/server/dev";
 type WebSocketUserData<TData extends Record<string, unknown> | undefined> = {
   id: string;
   url: URL;
@@ -20,26 +20,11 @@ export declare class ExtWSUwsServer<TData extends Record<string, unknown> | unde
     /** The path to listen on. */
     path?: string;
     /**
-     * Maximum amount of seconds that may pass without sending or getting a message.
-     * Connection is closed if this timeout passes. Resolution (granularity) for timeouts are typically 4 seconds, rounded to closest.
-     * Disable by using 0. Defaults to 120.
-     * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#idleTimeout
+     * Options of the underlying uWebSockets.js WebSocket behavior. `compression` defaults to `SHARED_COMPRESSOR`.
+     * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html
      */
-    idleTimeout?: number;
-    /**
-     * Maximum length of allowed backpressure per socket when publishing or sending messages.
-     * Slow receivers with too high backpressure will be skipped until they catch up or timeout.
-     * Defaults to 64 * 1024.
-     * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxBackpressure
-     */
-    maxBackpressure?: number;
-    /**
-     * Maximum length of received message. If a client tries to send you a message larger than this, the connection is immediately closed.
-     * Defaults to 16 * 1024.
-     * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxPayloadLength
-     */
-    maxPayloadLength?: number;
-  } & ExtWSOnBeforeUpgradeOptions<TData>);
+    uws?: Pick<WebSocketBehavior<unknown>, "closeOnBackpressureLimit" | "compression" | "maxBackpressure" | "maxPayloadLength">;
+  } & ExtWSOptions & ExtWSOnBeforeUpgradeOptions<TData>);
   override close(): Promise<void>;
 }
 export {};

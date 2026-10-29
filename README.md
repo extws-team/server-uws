@@ -1,15 +1,16 @@
-# @extws/sever-uws
+# @extws/server-uws
 
-WebSocket server with [ExtWS message protocol](https://github.com/extws-team/server/blob/dev-kirick/README.md#protocol) based on [uWebSockets.js](https://github.com/uNetworking/uWebSockets.js).
+WebSocket server with [ExtWS message protocol](https://github.com/extws-team/server#protocol) based on [uWebSockets.js](https://github.com/uNetworking/uWebSockets.js).
 
 > [!WARNING]
-> This package supports only Node.js 16.x, 18.x, 20.x and 21.x. This will be fixed in the future.
+> This package supports only Node.js 22.x, 23.x and 24.x, the versions uWebSockets.js provides binaries for.
 
 ## Features
 
 - 🚀 Custom message protocol that enables support for message types
 - 👥 Group messaging system
 - 🔄 Automatic connection management
+- 🔐 Typed data attached to each client, such as a session
 - 🔌 Automatic handling of broken or silently disconnected clients
 
 ## Installation
@@ -42,6 +43,72 @@ const server = new ExtWSUwsServer({
 });
 ```
 
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `port` | `number` | | Port to listen on. |
+| `path` | `string` | `'/ws'` | Path to accept WebSocket connections on. |
+| `idleTimeout` | `number` | `60` | Seconds a client may stay silent before it is disconnected. |
+| `pingTimeout` | `number` | `5` | Seconds a client has to answer a ping from the server. Must be less than `idleTimeout`. |
+| `onBeforeUpgrade` | `function` | | Hook called before a WebSocket upgrade, see [Authorization and client data](#authorization-and-client-data). |
+| `uws` | `object` | | Options of the underlying uWebSockets.js server, see [uWebSockets.js options](#uwebsocketsjs-options). |
+
+Once a client has been silent for `idleTimeout - pingTimeout` seconds, the server pings it, and disconnects the client if it does not answer within `pingTimeout` seconds. Clients also receive `idleTimeout` on connect, so [@extws/client](https://github.com/extws-team/client) can detect a server that went silent.
+
+### uWebSockets.js options
+
+Options of the underlying [WebSocket behavior](https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html) are passed in the `uws` option:
+
+```typescript
+import { DISABLED } from 'uWebSockets.js';
+
+const server = new ExtWSUwsServer({
+  port: 8080,
+  uws: {
+    compression: DISABLED,
+    maxPayloadLength: 64 * 1024,
+  },
+});
+```
+
+Supported options are `closeOnBackpressureLimit`, `compression`, `maxBackpressure` and `maxPayloadLength`, with uWebSockets.js defaults, except `compression` that defaults to `SHARED_COMPRESSOR`. Note that uWebSockets.js accepts messages up to 16 KB by default.
+
+### Authorization and client data
+
+The `onBeforeUpgrade` hook is called before a connection is upgraded to WebSocket. It receives the request's `url`, `headers` and `ip`, and returns either a `Response` to reject the upgrade, or data to attach to the client as `client.data`:
+
+```typescript
+const server = new ExtWSUwsServer({
+  port: 8080,
+  async onBeforeUpgrade({ headers }) {
+    const session = await getSession(headers.get('cookie'));
+    if (!session) {
+      // any status and headers, such as `Set-Cookie`
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    return { user_id: session.user_id };
+  },
+});
+
+server.on('chat', (event) => {
+  // typed as `{ user_id: number }`
+  console.log(event.client.data.user_id);
+});
+```
+
+The type of `client.data` is inferred from the hook. When the hook is missing or returns nothing, `client.data` is `undefined`. You can also declare the type explicitly, which makes the hook required:
+
+```typescript
+const server = new ExtWSUwsServer<{ user_id: number }>({
+  port: 8080,
+  onBeforeUpgrade({ headers }) {
+    // ...
+  },
+});
+```
+
 ## Handling events
 
 The key feature of ExtWS is its custom message protocol that allows efficient work with typed events. Instead of listening to all messages through a single WebSocket `message` event, ExtWS allows you to subscribe to specific event types.
@@ -58,26 +125,23 @@ server.on('chat', (event) => {
 });
 ```
 
-If you are using TypeScript, you can specify the type of the event data:
+Event data is sent by the client, so `event.detail` is typed as `unknown`. Validate it before use with libraries like [valibot](https://github.com/valibot/valibot), [zod](https://github.com/colinhacks/zod) or similar:
 
 ```typescript
-import type { ExtWSEvent } from '@extws/server';
+import * as v from 'valibot';
 
-interface ChatMessage {
-  message: string;
-  timestamp: number;
-}
+const ChatMessageSchema = v.object({
+  message: v.string(),
+  timestamp: v.number(),
+});
 
-// Typed event subscription
-server.on('chat', (event: ExtWSEvent<ChatMessage>) => {
-  // event.detail is typed as ChatMessage
-  console.log(event.detail.message);
-  console.log(event.detail.timestamp);
+server.on('chat', (event) => {
+  const chat_message = v.parse(ChatMessageSchema, event.detail);
+
+  console.log(chat_message.message);
+  console.log(chat_message.timestamp);
 });
 ```
-
-> [!WARNING]
-> However, because the data is sent from the client, it is better to validate the incoming data using libraries like [valibot](https://github.com/valibot/valibot), [zod](https://github.com/colinhacks/zod) or similar.
 
 To create one-time subscriptions, use `once` or `wait` methods:
 
@@ -183,6 +247,10 @@ server.sendToGroup('room1', 'chat', { message: 'Hello room!' });
 // Remove client from group
 client.leave('room1');
 ```
+
+## Scaling
+
+A single server only reaches its own clients. To run several servers and still reach every client from any of them, connect the servers with [@extws/adapter-redis](https://github.com/extws-team/adapter-redis).
 
 ## Stopping the server
 

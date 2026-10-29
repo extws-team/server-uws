@@ -1,8 +1,16 @@
 /* eslint-disable unicorn/no-for-each */
 // oxlint-disable unicorn/no-array-for-each
-import { App, SHARED_COMPRESSOR, type TemplatedApp } from 'uWebSockets.js';
+import {
+	App,
+	SHARED_COMPRESSOR,
+	type TemplatedApp,
+	type WebSocketBehavior,
+} from 'uWebSockets.js';
 import { ExtWS } from '@extws/server';
-import type { ExtWSOnBeforeUpgradeOptions } from '@extws/server/dev';
+import type {
+	ExtWSOnBeforeUpgradeOptions,
+	ExtWSOptions,
+} from '@extws/server/dev';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsClient, type WebSocketUserData } from './client.js';
 
@@ -19,44 +27,38 @@ export class ExtWSUwsServer<
 			/** The path to listen on. */
 			path?: string;
 			/**
-			 * Maximum amount of seconds that may pass without sending or getting a message.
-			 * Connection is closed if this timeout passes. Resolution (granularity) for timeouts are typically 4 seconds, rounded to closest.
-			 * Disable by using 0. Defaults to 120.
-			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#idleTimeout
+			 * Options of the underlying uWebSockets.js WebSocket behavior. `compression` defaults to `SHARED_COMPRESSOR`.
+			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html
 			 */
-			idleTimeout?: number;
-			/**
-			 * Maximum length of allowed backpressure per socket when publishing or sending messages.
-			 * Slow receivers with too high backpressure will be skipped until they catch up or timeout.
-			 * Defaults to 64 * 1024.
-			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxBackpressure
-			 */
-			maxBackpressure?: number;
-			/**
-			 * Maximum length of received message. If a client tries to send you a message larger than this, the connection is immediately closed.
-			 * Defaults to 16 * 1024.
-			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxPayloadLength
-			 */
-			maxPayloadLength?: number;
-		} & ExtWSOnBeforeUpgradeOptions<TData>,
+			uws?: Pick<
+				WebSocketBehavior<unknown>,
+				| 'closeOnBackpressureLimit'
+				| 'compression'
+				| 'maxBackpressure'
+				| 'maxPayloadLength'
+			>;
+		} & ExtWSOptions &
+			ExtWSOnBeforeUpgradeOptions<TData>,
 	) {
 		const {
 			port,
 			path = '/ws',
-			idleTimeout = 400_000,
-			maxBackpressure,
-			maxPayloadLength,
+			uws,
+			idleTimeout,
+			pingTimeout,
 			...options_rest
 		} = options;
 
-		super();
+		super({ idleTimeout, pingTimeout });
 
 		this.uws_server = App().ws<WebSocketUserData<TData>>(path, {
-			compression: SHARED_COMPRESSOR,
-			idleTimeout: Math.floor(idleTimeout / 1000),
-			maxBackpressure,
+			closeOnBackpressureLimit: uws?.closeOnBackpressureLimit,
+			compression: uws?.compression ?? SHARED_COMPRESSOR,
+			// silent clients are disconnected by the ExtWS watchdog
+			idleTimeout: 0,
+			maxBackpressure: uws?.maxBackpressure,
 			maxLifetime: 0,
-			maxPayloadLength,
+			maxPayloadLength: uws?.maxPayloadLength,
 			async upgrade(response, request, context) {
 				let is_aborted = false;
 				response.onAborted(() => {
@@ -162,8 +164,11 @@ export class ExtWSUwsServer<
 			},
 		});
 
-		this.uws_server.listen(port, () => {
-			// do nothing
+		this.uws_server.listen(port, (listen_socket) => {
+			// uWS calls back synchronously, so this throws from the constructor
+			if (listen_socket === false) {
+				throw new Error(`Cannot listen on port ${port}.`);
+			}
 		});
 	}
 
@@ -172,10 +177,9 @@ export class ExtWSUwsServer<
 		this.uws_server.publish(channel, payload);
 	}
 
-	override close(): Promise<void> {
+	override async close(): Promise<void> {
 		this.uws_server.close();
-
-		return Promise.resolve();
+		await super.close();
 	}
 }
 

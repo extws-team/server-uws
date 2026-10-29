@@ -1,6 +1,7 @@
 // oxlint-disable max-nested-callbacks
 
 import type { ExtWSClient } from '@extws/server';
+import { createServer } from 'node:net';
 import fetch from 'node-fetch';
 import { afterAll, describe, expect, test } from 'vitest';
 import { WebSocket } from 'ws';
@@ -13,6 +14,7 @@ import {
 	testSendToGroup,
 	testSendToSocket,
 } from '../test/server.js';
+import { ExtWSUwsServer } from './main.js';
 
 const WEBSOCKET_URL = 'ws://localhost:8080/ws';
 const ERROR_TIMEOUT = 'Timeout: No message received within the specified time';
@@ -211,5 +213,47 @@ describe('disconnect', () => {
 		});
 
 		expect(extwsServer.clients.size).toBe(0);
+	});
+});
+
+describe('listen', () => {
+	test('port taken by another process throws', async () => {
+		const blocker = createServer();
+		await new Promise<void>((resolve) => {
+			blocker.listen(8091, resolve);
+		});
+
+		expect(() => new ExtWSUwsServer({ port: 8091 })).toThrow(
+			'Cannot listen on port 8091.',
+		);
+
+		blocker.close();
+	});
+});
+
+describe('close', () => {
+	test('stops the server, its connections and the ExtWS core', async () => {
+		const server = new ExtWSUwsServer({ port: 8092 });
+		const websocket = new WebSocket('ws://localhost:8092/ws');
+		const promise_closed = new Promise((resolve) => {
+			websocket.once('close', resolve);
+		});
+		await new Promise((resolve) => {
+			websocket.once('message', resolve);
+		});
+
+		let is_notified = false;
+		server.on('custom', () => {
+			is_notified = true;
+		});
+
+		await server.close();
+		await promise_closed;
+
+		// listeners are removed by ExtWS
+		server.dispatchEvent(new Event('custom'));
+		expect(is_notified).toBe(false);
+
+		await expect(fetch('http://localhost:8092/ws')).rejects.toThrow();
 	});
 });
