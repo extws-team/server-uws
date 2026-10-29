@@ -1,34 +1,8 @@
-//#region rolldown:runtime
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-
-//#endregion
+Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 let uWebSockets_js = require("uWebSockets.js");
-uWebSockets_js = __toESM(uWebSockets_js);
-let __extws_server = require("@extws/server");
-__extws_server = __toESM(__extws_server);
-let __kirick_ip = require("@kirick/ip");
-__kirick_ip = __toESM(__kirick_ip);
-
-//#region src/client.ts
+let _extws_server = require("@extws/server");
+let _kirick_ip = require("@kirick/ip");
+// src/client.ts
 /**
 * Prints some errors to console.
 * @param error Error to print.
@@ -36,16 +10,18 @@ __kirick_ip = __toESM(__kirick_ip);
 function printError(error) {
 	if (error instanceof Error && error.message !== "Invalid access of closed uWS.WebSocket/SSLWebSocket.") console.error(error);
 }
-var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
+var ExtWSUwsClient = class extends _extws_server.ExtWSClient {
+	uws_client;
 	constructor(server, uws_client) {
 		const user_data = uws_client.getUserData();
 		super(server, {
 			url: user_data.url,
 			headers: user_data.headers,
-			ip: new __kirick_ip.IP(uws_client.getRemoteAddress())
+			ip: new _kirick_ip.IP(uws_client.getRemoteAddress())
 		});
 		this.uws_client = uws_client;
 	}
+	/** @internal */
 	addToChannel(channel_id) {
 		try {
 			this.uws_client.subscribe(channel_id);
@@ -54,6 +30,7 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 			this.disconnect();
 		}
 	}
+	/** @internal */
 	removeFromChannel(channel_id) {
 		try {
 			this.uws_client.unsubscribe(channel_id);
@@ -62,6 +39,7 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 			this.disconnect();
 		}
 	}
+	/** @internal */
 	sendPayload(payload) {
 		try {
 			this.uws_client.send(payload);
@@ -79,13 +57,11 @@ var ExtWSUwsClient = class extends __extws_server.ExtWSClient {
 		super.disconnect();
 	}
 };
-
-//#endregion
-//#region src/main.ts
-var ExtWSUwsServer = class extends __extws_server.ExtWS {
+// src/main.ts
+var ExtWSUwsServer = class extends _extws_server.ExtWS {
 	uws_server;
 	constructor(options) {
-		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
+		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength, ...options_rest } = options;
 		super();
 		this.uws_server = (0, uWebSockets_js.App)().ws(path, {
 			compression: uWebSockets_js.SHARED_COMPRESSOR,
@@ -104,7 +80,7 @@ var ExtWSUwsServer = class extends __extws_server.ExtWS {
 						headers.set(key, value);
 					});
 					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
-					const ip = new __kirick_ip.IP(response.getRemoteAddress());
+					const ip = new _kirick_ip.IP(response.getRemoteAddress());
 					const upgrade_response = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
@@ -170,7 +146,5 @@ var ExtWSUwsServer = class extends __extws_server.ExtWS {
 		return Promise.resolve();
 	}
 };
-
-//#endregion
 exports.ExtWSUwsClient = ExtWSUwsClient;
 exports.ExtWSUwsServer = ExtWSUwsServer;

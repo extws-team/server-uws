@@ -1,8 +1,7 @@
 import { App, SHARED_COMPRESSOR } from "uWebSockets.js";
 import { ExtWS, ExtWSClient } from "@extws/server";
 import { IP } from "@kirick/ip";
-
-//#region src/client.ts
+// src/client.ts
 /**
 * Prints some errors to console.
 * @param error Error to print.
@@ -11,6 +10,7 @@ function printError(error) {
 	if (error instanceof Error && error.message !== "Invalid access of closed uWS.WebSocket/SSLWebSocket.") console.error(error);
 }
 var ExtWSUwsClient = class extends ExtWSClient {
+	uws_client;
 	constructor(server, uws_client) {
 		const user_data = uws_client.getUserData();
 		super(server, {
@@ -20,6 +20,7 @@ var ExtWSUwsClient = class extends ExtWSClient {
 		});
 		this.uws_client = uws_client;
 	}
+	/** @internal */
 	addToChannel(channel_id) {
 		try {
 			this.uws_client.subscribe(channel_id);
@@ -28,6 +29,7 @@ var ExtWSUwsClient = class extends ExtWSClient {
 			this.disconnect();
 		}
 	}
+	/** @internal */
 	removeFromChannel(channel_id) {
 		try {
 			this.uws_client.unsubscribe(channel_id);
@@ -36,6 +38,7 @@ var ExtWSUwsClient = class extends ExtWSClient {
 			this.disconnect();
 		}
 	}
+	/** @internal */
 	sendPayload(payload) {
 		try {
 			this.uws_client.send(payload);
@@ -53,13 +56,11 @@ var ExtWSUwsClient = class extends ExtWSClient {
 		super.disconnect();
 	}
 };
-
-//#endregion
-//#region src/main.ts
+// src/main.ts
 var ExtWSUwsServer = class extends ExtWS {
 	uws_server;
 	constructor(options) {
-		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength,...options_rest } = options;
+		const { port, path = "/ws", idleTimeout = 4e5, maxBackpressure, maxPayloadLength, ...options_rest } = options;
 		super();
 		this.uws_server = App().ws(path, {
 			compression: SHARED_COMPRESSOR,
@@ -144,6 +145,4 @@ var ExtWSUwsServer = class extends ExtWS {
 		return Promise.resolve();
 	}
 };
-
-//#endregion
 export { ExtWSUwsClient, ExtWSUwsServer };

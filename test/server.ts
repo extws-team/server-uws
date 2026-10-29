@@ -1,6 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
-import { type ExtWSClient } from '@extws/server';
+import type { ExtWSClient } from '@extws/server';
 import * as v from 'valibot';
 import { ExtWSUwsServer } from '../src/main.js';
 

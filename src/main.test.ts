@@ -1,6 +1,6 @@
 // oxlint-disable max-nested-callbacks
 
-import { type ExtWSClient } from '@extws/server';
+import type { ExtWSClient } from '@extws/server';
 import fetch from 'node-fetch';
 import { afterAll, describe, expect, test } from 'vitest';
 import { WebSocket } from 'ws';

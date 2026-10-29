@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/no-for-each */
+// oxlint-disable unicorn/no-array-for-each
 import { App, SHARED_COMPRESSOR, type TemplatedApp } from 'uWebSockets.js';
 import { ExtWS } from '@extws/server';
 import type { ExtWSOnBeforeUpgradeHandler } from '@extws/server/dev';
@@ -61,7 +63,6 @@ export class ExtWSUwsServer extends ExtWS {
 
 				try {
 					const headers = new Headers();
-					// oxlint-disable-next-line unicorn/no-array-for-each
 					request.forEach((key, value) => {
 						headers.set(key, value);
 					});
@@ -93,7 +94,6 @@ export class ExtWSUwsServer extends ExtWS {
 						response.cork(() => {
 							response.writeStatus(String(upgrade_response.status));
 
-							// oxlint-disable-next-line unicorn/no-array-for-each
 							upgrade_response.headers.forEach((value, key) => {
 								response.writeHeader(key, value);
 							});

@@ -37,7 +37,8 @@ export class ExtWSUwsClient extends ExtWSClient {
 		});
 	}
 
-	override addToChannel(channel_id: string): void {
+	/** @internal */
+	addToChannel(channel_id: string): void {
 		try {
 			this.uws_client.subscribe(channel_id);
 		} catch (error) {
@@ -46,7 +47,8 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override removeFromChannel(channel_id: string): void {
+	/** @internal */
+	removeFromChannel(channel_id: string): void {
 		try {
 			this.uws_client.unsubscribe(channel_id);
 		} catch (error) {
@@ -55,7 +57,8 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override sendPayload(payload: string): void {
+	/** @internal */
+	sendPayload(payload: string): void {
 		try {
 			this.uws_client.send(payload);
 		} catch (error) {
@@ -64,7 +67,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 		}
 	}
 
-	override disconnect(is_disconnected: boolean = false): void {
+	override disconnect(is_disconnected = false): void {
 		if (!is_disconnected) {
 			try {
 				this.uws_client.end();
