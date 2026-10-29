@@ -5,13 +5,13 @@
     "": {
       "name": "@extws/server-uws",
       "dependencies": {
-        "@extws/server": "file:/tmp/devpack/github/@extws/server/pack-7a1f7fa.tar.gz",
+        "@extws/server": "github:extws-team/server#48f82f8e050b6d034de84ae579a3308cb47bacb3",
         "uWebSockets.js": "github:uNetworking/uWebSockets.js#cfc9a40d8132a34881813cec3d5f8e3a185b3ce3",
       },
       "devDependencies": {
         "@biomejs/biome": "2.5.4",
         "@kirick/lint": "0.4.2",
-        "@types/node": "^20",
+        "@types/node": "^22",
         "@types/ws": "8.18.1",
         "eslint": "10.7.0",
         "node-fetch": "3.3.2",
@@ -120,7 +120,7 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.7.3", "", { "dependencies": { "@eslint/core": "^1.2.1", "levn": "^0.4.1" } }, "sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q=="],
 
-    "@extws/server": ["@extws/server@/tmp/devpack/github/@extws/server/pack-7a1f7fa.tar.gz", { "dependencies": { "nanoid": "6.0.2", "neoevents": "0.3.1" }, "peerDependencies": { "@kirick/ip": "^0.2.1" } }, "sha512-SuBuJrL2qSZUJ2VsRYK4EWikTxCp0XyJqUCu6/IYzlWSLNz8OXTHhYCMvFmfZQw239uY0ZVgEuTY2bOW2Q3d3w=="],
+    "@extws/server": ["@extws/server@github:extws-team/server#48f82f8", { "dependencies": { "nanoid": "6.0.2", "neoevents": "0.3.1" }, "peerDependencies": { "@kirick/ip": "^0.2.1" } }, "extws-team-server-48f82f8", "sha512-OZZoIUIjpSqdePgOIxUvgpQpfZ15pImh51Qrp655xhVZ/nf9WPO2EjSTTMBIzBPT3UaNqUvD237XSSJgnTeOLg=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
@@ -274,7 +274,7 @@
 
     "@types/json-schema": ["@types/json-schema@7.0.15", "", {}, "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="],
 
-    "@types/node": ["@types/node@20.19.9", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw=="],
+    "@types/node": ["@types/node@22.20.5", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA=="],
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 

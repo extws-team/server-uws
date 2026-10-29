@@ -17,7 +17,8 @@ var ExtWSUwsClient = class extends _extws_server.ExtWSClient {
 		super(server, {
 			url: user_data.url,
 			headers: user_data.headers,
-			ip: new _kirick_ip.IP(uws_client.getRemoteAddress())
+			ip: new _kirick_ip.IP(uws_client.getRemoteAddress()),
+			data: user_data.data
 		});
 		this.uws_client = uws_client;
 	}
@@ -81,18 +82,18 @@ var ExtWSUwsServer = class extends _extws_server.ExtWS {
 					});
 					const url = new URL(`${request.getUrl()}?${request.getQuery()}`, `ws://${headers.get("host")}`);
 					const ip = new _kirick_ip.IP(response.getRemoteAddress());
-					const upgrade_response = await options_rest.onBeforeUpgrade?.({
+					const upgrade_result = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
 						ip
 					});
 					if (is_aborted) return;
-					if (upgrade_response) {
-						const upgrade_response_body = await upgrade_response.arrayBuffer();
+					if (upgrade_result instanceof Response) {
+						const upgrade_response_body = await upgrade_result.arrayBuffer();
 						if (is_aborted) return;
 						response.cork(() => {
-							response.writeStatus(String(upgrade_response.status));
-							upgrade_response.headers.forEach((value, key) => {
+							response.writeStatus(String(upgrade_result.status));
+							upgrade_result.headers.forEach((value, key) => {
 								response.writeHeader(key, value);
 							});
 							response.write(upgrade_response_body);
@@ -102,7 +103,8 @@ var ExtWSUwsServer = class extends _extws_server.ExtWS {
 						response.upgrade({
 							id: "",
 							url,
-							headers
+							headers,
+							data: upgrade_result
 						}, headers.get("sec-websocket-key") ?? "", headers.get("sec-websocket-protocol") ?? "", headers.get("sec-websocket-extensions") ?? "", context);
 					});
 				} catch (error) {
@@ -138,6 +140,7 @@ var ExtWSUwsServer = class extends _extws_server.ExtWS {
 		});
 		this.uws_server.listen(port, () => {});
 	}
+	/** @internal */
 	publish(channel, payload) {
 		this.uws_server.publish(channel, payload);
 	}

@@ -4,7 +4,9 @@ import type { ExtWSClient } from '@extws/server';
 import * as v from 'valibot';
 import { ExtWSUwsServer } from '../src/main.js';
 
-export const extwsServer = new ExtWSUwsServer({
+export type TestData = { name: string } | undefined;
+
+export const extwsServer = new ExtWSUwsServer<TestData>({
 	port: 8080,
 	async onBeforeUpgrade({ url }) {
 		await new Promise((resolve) => {
@@ -18,6 +20,11 @@ export const extwsServer = new ExtWSUwsServer({
 					'x-test': 'test',
 				},
 			});
+		}
+
+		const name = url.searchParams.get('name');
+		if (name) {
+			return { name };
 		}
 	},
 });
@@ -41,11 +48,17 @@ export function testBroadcast() {
 	});
 }
 
-export function testGroupJoin(extwsClient: ExtWSClient, name: string) {
+export function testGroupJoin(
+	extwsClient: ExtWSClient<TestData>,
+	name: string,
+) {
 	extwsClient.join(name);
 }
 
-export function testGroupLeave(extwsClient: ExtWSClient, name: string) {
+export function testGroupLeave(
+	extwsClient: ExtWSClient<TestData>,
+	name: string,
+) {
 	extwsClient.leave(name);
 }
 

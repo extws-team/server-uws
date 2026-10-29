@@ -1,17 +1,18 @@
 import { WebSocket } from "uWebSockets.js";
 import { ExtWS, ExtWSClient } from "@extws/server";
-import { ExtWSOnBeforeUpgradeHandler } from "@extws/server/dev";
-type WebSocketUserData = {
+import { ExtWSOnBeforeUpgradeOptions } from "@extws/server/dev";
+type WebSocketUserData<TData extends Record<string, unknown> | undefined> = {
   id: string;
   url: URL;
   headers: Headers;
+  data: TData;
 };
-export declare class ExtWSUwsClient extends ExtWSClient {
+export declare class ExtWSUwsClient<TData extends Record<string, unknown> | undefined = undefined> extends ExtWSClient<TData> {
   private uws_client;
-  constructor(server: ExtWSUwsServer, uws_client: WebSocket<WebSocketUserData>);
+  constructor(server: ExtWSUwsServer<TData>, uws_client: WebSocket<WebSocketUserData<TData>>);
   override disconnect(is_disconnected?: boolean): void;
 }
-export declare class ExtWSUwsServer extends ExtWS {
+export declare class ExtWSUwsServer<TData extends Record<string, unknown> | undefined = undefined> extends ExtWS<TData> {
   private uws_server;
   constructor(options: {
     /** The port to listen on. */
@@ -38,10 +39,7 @@ export declare class ExtWSUwsServer extends ExtWS {
      * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxPayloadLength
      */
     maxPayloadLength?: number;
-    /** Hook that is called before a WebSocket upgrade. Useful to parse authorization and reject upgrade with custom headers such as `Set-Cookie`. */
-    onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
-  });
-  protected override publish(channel: string, payload: string): void;
+  } & ExtWSOnBeforeUpgradeOptions<TData>);
   override close(): Promise<void>;
 }
 export {};

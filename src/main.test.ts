@@ -6,6 +6,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 import { WebSocket } from 'ws';
 import {
 	extwsServer,
+	type TestData,
 	testBroadcast,
 	testGroupJoin,
 	testGroupLeave,
@@ -43,13 +44,14 @@ function waitMessage(target: WebSocket): Promise<string> {
 
 /**
  * Create a WebSocket client and get the corresponding ExtWSClient.
+ * @param path_postfix - The path postfix for the WebSocket.
  * @returns -
  */
-async function createClient(): Promise<{
+async function createClient(path_postfix?: string): Promise<{
 	websocket: WebSocket;
-	extwsClient: ExtWSClient;
+	extwsClient: ExtWSClient<TestData>;
 }> {
-	const websocket = new WebSocket(WEBSOCKET_URL);
+	const websocket = new WebSocket(WEBSOCKET_URL + (path_postfix ?? ''));
 	const init_message_promise = waitMessage(websocket);
 	await new Promise((resolve) => {
 		websocket.once('open', resolve);
@@ -89,6 +91,15 @@ describe('ExtWSUwsServer', () => {
 		expect(response.status).toBe(400);
 		expect(response.headers.get('x-test')).toBe('test');
 		await expect(response.text()).resolves.toBe('drop');
+	});
+
+	test('onBeforeUpgrade data is attached to client', async () => {
+		expect(client.extwsClient.data).toBeUndefined();
+
+		const client_named = await createClient('?name=alice');
+		expect(client_named.extwsClient.data).toEqual({ name: 'alice' });
+
+		client_named.extwsClient.disconnect();
 	});
 
 	test('ping', async () => {

@@ -2,42 +2,44 @@
 // oxlint-disable unicorn/no-array-for-each
 import { App, SHARED_COMPRESSOR, type TemplatedApp } from 'uWebSockets.js';
 import { ExtWS } from '@extws/server';
-import type { ExtWSOnBeforeUpgradeHandler } from '@extws/server/dev';
+import type { ExtWSOnBeforeUpgradeOptions } from '@extws/server/dev';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsClient, type WebSocketUserData } from './client.js';
 
-export class ExtWSUwsServer extends ExtWS {
+export class ExtWSUwsServer<
+	TData extends Record<string, unknown> | undefined = undefined,
+> extends ExtWS<TData> {
 	private uws_server: TemplatedApp;
 
 	// oxlint-disable-next-line max-lines-per-function
-	constructor(options: {
-		/** The port to listen on. */
-		port: number;
-		/** The path to listen on. */
-		path?: string;
-		/**
-		 * Maximum amount of seconds that may pass without sending or getting a message.
-		 * Connection is closed if this timeout passes. Resolution (granularity) for timeouts are typically 4 seconds, rounded to closest.
-		 * Disable by using 0. Defaults to 120.
-		 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#idleTimeout
-		 */
-		idleTimeout?: number;
-		/**
-		 * Maximum length of allowed backpressure per socket when publishing or sending messages.
-		 * Slow receivers with too high backpressure will be skipped until they catch up or timeout.
-		 * Defaults to 64 * 1024.
-		 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxBackpressure
-		 */
-		maxBackpressure?: number;
-		/**
-		 * Maximum length of received message. If a client tries to send you a message larger than this, the connection is immediately closed.
-		 * Defaults to 16 * 1024.
-		 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxPayloadLength
-		 */
-		maxPayloadLength?: number;
-		/** Hook that is called before a WebSocket upgrade. Useful to parse authorization and reject upgrade with custom headers such as `Set-Cookie`. */
-		onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
-	}) {
+	constructor(
+		options: {
+			/** The port to listen on. */
+			port: number;
+			/** The path to listen on. */
+			path?: string;
+			/**
+			 * Maximum amount of seconds that may pass without sending or getting a message.
+			 * Connection is closed if this timeout passes. Resolution (granularity) for timeouts are typically 4 seconds, rounded to closest.
+			 * Disable by using 0. Defaults to 120.
+			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#idleTimeout
+			 */
+			idleTimeout?: number;
+			/**
+			 * Maximum length of allowed backpressure per socket when publishing or sending messages.
+			 * Slow receivers with too high backpressure will be skipped until they catch up or timeout.
+			 * Defaults to 64 * 1024.
+			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxBackpressure
+			 */
+			maxBackpressure?: number;
+			/**
+			 * Maximum length of received message. If a client tries to send you a message larger than this, the connection is immediately closed.
+			 * Defaults to 16 * 1024.
+			 * @see https://unetworking.github.io/uWebSockets.js/generated/interfaces/WebSocketBehavior.html#maxPayloadLength
+			 */
+			maxPayloadLength?: number;
+		} & ExtWSOnBeforeUpgradeOptions<TData>,
+	) {
 		const {
 			port,
 			path = '/ws',
@@ -49,7 +51,7 @@ export class ExtWSUwsServer extends ExtWS {
 
 		super();
 
-		this.uws_server = App().ws<WebSocketUserData>(path, {
+		this.uws_server = App().ws<WebSocketUserData<TData>>(path, {
 			compression: SHARED_COMPRESSOR,
 			idleTimeout: Math.floor(idleTimeout / 1000),
 			maxBackpressure,
@@ -74,7 +76,7 @@ export class ExtWSUwsServer extends ExtWS {
 
 					const ip = new IP(response.getRemoteAddress());
 
-					const upgrade_response = await options_rest.onBeforeUpgrade?.({
+					const upgrade_result = await options_rest.onBeforeUpgrade?.({
 						url,
 						headers,
 						ip,
@@ -84,17 +86,17 @@ export class ExtWSUwsServer extends ExtWS {
 						return;
 					}
 
-					if (upgrade_response) {
-						const upgrade_response_body = await upgrade_response.arrayBuffer();
+					if (upgrade_result instanceof Response) {
+						const upgrade_response_body = await upgrade_result.arrayBuffer();
 
 						if (is_aborted) {
 							return;
 						}
 
 						response.cork(() => {
-							response.writeStatus(String(upgrade_response.status));
+							response.writeStatus(String(upgrade_result.status));
 
-							upgrade_response.headers.forEach((value, key) => {
+							upgrade_result.headers.forEach((value, key) => {
 								response.writeHeader(key, value);
 							});
 
@@ -103,11 +105,13 @@ export class ExtWSUwsServer extends ExtWS {
 						});
 					} else {
 						response.cork(() => {
-							response.upgrade<WebSocketUserData>(
+							response.upgrade<WebSocketUserData<TData>>(
 								{
 									id: '',
 									url,
 									headers,
+									// undefined only gets here when TData allows it, otherwise the hook is required and cannot return it
+									data: upgrade_result as TData,
 								},
 								headers.get('sec-websocket-key') ?? '',
 								headers.get('sec-websocket-protocol') ?? '',
@@ -163,7 +167,8 @@ export class ExtWSUwsServer extends ExtWS {
 		});
 	}
 
-	protected override publish(channel: string, payload: string): void {
+	/** @internal */
+	publish(channel: string, payload: string): void {
 		this.uws_server.publish(channel, payload);
 	}
 

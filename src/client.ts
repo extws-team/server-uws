@@ -3,10 +3,13 @@ import { ExtWSClient } from '@extws/server';
 import { IP } from '@kirick/ip';
 import { ExtWSUwsServer } from './main.js';
 
-export type WebSocketUserData = {
+export type WebSocketUserData<
+	TData extends Record<string, unknown> | undefined,
+> = {
 	id: string;
 	url: URL;
 	headers: Headers;
+	data: TData;
 };
 
 /**
@@ -23,10 +26,12 @@ function printError(error: unknown) {
 	}
 }
 
-export class ExtWSUwsClient extends ExtWSClient {
+export class ExtWSUwsClient<
+	TData extends Record<string, unknown> | undefined = undefined,
+> extends ExtWSClient<TData> {
 	constructor(
-		server: ExtWSUwsServer,
-		private uws_client: WebSocket<WebSocketUserData>,
+		server: ExtWSUwsServer<TData>,
+		private uws_client: WebSocket<WebSocketUserData<TData>>,
 	) {
 		const user_data = uws_client.getUserData();
 
@@ -34,6 +39,7 @@ export class ExtWSUwsClient extends ExtWSClient {
 			url: user_data.url,
 			headers: user_data.headers,
 			ip: new IP(uws_client.getRemoteAddress()),
+			data: user_data.data,
 		});
 	}
 
